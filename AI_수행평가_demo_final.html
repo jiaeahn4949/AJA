@@ -1,0 +1,2520 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수행평가 AI 연습</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F6F4EF;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --border: #E2DDD4;
+  --border2: #C9C2B5;
+  --text: #1C1A17;
+  --text2: #6A6560;
+  --text3: #9E9890;
+  --accent: #2B5CE6;
+  --accent-l: #EEF2FF;
+  --accent-b: #C5D0FA;
+  --green: #2D9E44;
+  --green-l: #EBFBEE;
+  --green-b: #B2F2BB;
+  --amber: #D97706;
+  --amber-l: #FFFBEB;
+  --amber-b: #FCD34D;
+  --coral: #C92A2A;
+  --coral-l: #FFF5F5;
+  --coral-b: #FFC9C9;
+  --purple: #6D28D9;
+  --purple-l: #F5F3FF;
+  --purple-b: #DDD6FE;
+  --teal: #0D9488;
+  --teal-l: #F0FDFA;
+  --teal-b: #99F6E4;
+  --r: 12px;
+  --r-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── NAV ── */
+.nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px; position: sticky; top: 0; z-index: 200;
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-logo { background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 5px; letter-spacing: .05em; }
+.nav-title { font-size: 14px; font-weight: 500; }
+.nav-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+/* ── API BANNER ── */
+.api-banner {
+  background: var(--amber-l); border-bottom: 1px solid var(--amber-b);
+  padding: 9px 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.api-banner span { font-size: 13px; color: #78350F; }
+.api-banner input {
+  flex: 1; min-width: 200px; max-width: 360px;
+  padding: 5px 11px; border: 1px solid var(--amber-b); border-radius: 7px;
+  font-size: 13px; font-family: 'DM Mono', monospace; background: #FFFDF5; color: var(--text);
+}
+.api-banner button { padding: 5px 14px; background: var(--accent); color: #fff; border: none; border-radius: 7px; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+.api-banner a { font-size: 12px; color: var(--accent); text-decoration: none; }
+
+/* ── LAYOUT ── */
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: 0; min-height: calc(100vh - 52px); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  display: flex; flex-direction: column; gap: 12px;
+  position: sticky; top: 52px; height: calc(100vh - 52px); overflow-y: auto;
+}
+.sidebar-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  color: var(--text3); text-transform: uppercase;
+  padding: 0 6px; margin-bottom: 4px;
+}
+
+/* Subject tabs */
+.subject-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 0 2px; }
+.subj-btn {
+  padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border2); font-size: 12px;
+  cursor: pointer; background: var(--surface); color: var(--text2);
+  transition: all .15s; font-family: 'Noto Sans KR', sans-serif;
+}
+.subj-btn.active { background: var(--accent-l); color: var(--accent); border-color: var(--accent-b); font-weight: 500; }
+.subj-btn.disabled { opacity: .4; cursor: default; }
+
+/* Grade + unit tree */
+.tree { display: flex; flex-direction: column; gap: 2px; }
+.tree-grade {
+  padding: 7px 8px; font-size: 12px; font-weight: 500;
+  color: var(--text2); display: flex; align-items: center; gap: 6px;
+  cursor: pointer; border-radius: var(--r-sm); transition: background .1s;
+  user-select: none;
+}
+.tree-grade:hover { background: var(--surface2); }
+.tree-grade .arrow { font-size: 10px; transition: transform .15s; }
+.tree-grade.open .arrow { transform: rotate(90deg); }
+.tree-units { padding-left: 18px; display: none; flex-direction: column; gap: 1px; }
+.tree-grade.open + .tree-units { display: flex; }
+.unit-btn {
+  padding: 7px 10px; border-radius: var(--r-sm);
+  font-size: 13px; cursor: pointer; background: transparent;
+  color: var(--text2); border: none; text-align: left;
+  font-family: 'Noto Sans KR', sans-serif; transition: all .15s;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.unit-btn:hover { background: var(--surface2); color: var(--text); }
+.unit-btn.active { background: var(--accent-l); color: var(--accent); }
+.unit-btn .unit-sub { font-size: 11px; color: var(--text3); }
+.unit-btn.active .unit-sub { color: var(--accent-b); }
+
+/* Rubric in sidebar */
+.rubric-box { border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+.rubric-box table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.rubric-box td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text2); line-height: 1.5; }
+.rubric-box tr:last-child td { border-bottom: none; }
+.rubric-box td:first-child { width: 66px; }
+.lv { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.lv-a { background: var(--green-l); color: var(--green); border: 1px solid var(--green-b); }
+.lv-b { background: var(--accent-l); color: var(--accent); border: 1px solid var(--accent-b); }
+.lv-c { background: var(--amber-l); color: var(--amber); border: 1px solid var(--amber-b); }
+.lv-d { background: var(--coral-l); color: var(--coral); border: 1px solid var(--coral-b); }
+
+/* Coming soon badge */
+.soon { display: inline-block; font-size: 10px; padding: 1px 6px; background: var(--surface2); color: var(--text3); border-radius: 4px; margin-left: 4px; }
+
+/* ── MAIN ── */
+.main { padding: 24px 24px; display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
+
+/* Problem card */
+.problem-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 18px 20px;
+}
+.problem-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.act-tag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 5px; letter-spacing: .04em; }
+.tag-blue { background: var(--accent-l); color: var(--accent); border: 1px solid var(--accent-b); }
+.tag-purple { background: var(--purple-l); color: var(--purple); border: 1px solid var(--purple-b); }
+.tag-teal { background: var(--teal-l); color: var(--teal); border: 1px solid var(--teal-b); }
+.tag-green { background: var(--green-l); color: var(--green); border: 1px solid var(--green-b); }
+.problem-title { font-size: 14px; font-weight: 500; }
+.problem-body {
+  background: var(--surface2); border-radius: var(--r-sm);
+  padding: 13px 15px; font-size: 14px; line-height: 1.8;
+  border-left: 3px solid var(--accent);
+}
+.hl { display: inline; background: var(--accent-l); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+.hl-g { background: var(--green-l); color: var(--green); padding: 1px 6px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+.problem-meta { font-size: 11px; color: var(--text3); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+/* Activity tabs */
+.act-tabs { display: flex; gap: 6px; }
+.act-tab {
+  flex: 1; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 500; cursor: pointer; background: var(--surface);
+  color: var(--text2); text-align: center; line-height: 1.4; transition: all .15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.act-tab.active { background: var(--accent-l); color: var(--accent); border-color: var(--accent-b); }
+.act-tab .tab-sub { font-weight: 400; font-size: 11px; color: var(--text3); margin-top: 1px; }
+.act-tab.active .tab-sub { color: var(--accent-b); }
+
+/* Steps */
+.steps-row { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+.step-node { display: flex; align-items: center; gap: 4px; }
+.step-dot { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border2); background: var(--surface); color: var(--text3); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-dot.cur { background: var(--accent); color: #fff; border-color: var(--accent); }
+.step-dot.done { background: var(--green); color: #fff; border-color: var(--green); }
+.step-lbl { font-size: 11px; color: var(--text3); }
+.step-lbl.cur { color: var(--text); font-weight: 500; }
+.step-line { flex: 1; height: 0.5px; background: var(--border2); min-width: 12px; }
+
+/* Chat */
+.chat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.chat-header { padding: 11px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; gap: 8px; }
+.chat-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.chat-hdr-txt { font-size: 13px; font-weight: 500; color: var(--text2); }
+.chat-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; min-height: 160px; max-height: 400px; overflow-y: auto; }
+.chat-body::-webkit-scrollbar { width: 3px; }
+.chat-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.bbl { padding: 11px 14px; border-radius: 14px; font-size: 14px; line-height: 1.65; max-width: 90%; animation: bIn .2s ease; }
+@keyframes bIn { from { opacity:0; transform: translateY(5px); } to { opacity:1; transform: translateY(0); } }
+.bbl-lbl { font-size: 10px; font-weight: 700; letter-spacing: .04em; margin-bottom: 4px; text-transform: uppercase; }
+.bbl.ai { background: var(--surface2); border: 1px solid var(--border); border-bottom-left-radius: 4px; align-self: flex-start; color: var(--text); }
+.bbl.ai .bbl-lbl { color: var(--text3); }
+.bbl.user { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+.bbl.fb { background: var(--green-l); border: 1px solid var(--green-b); border-bottom-left-radius: 4px; align-self: flex-start; color: #153A1F; }
+.bbl.fb .bbl-lbl { color: var(--green); }
+.bbl.peer { background: var(--amber-l); border: 1px solid var(--amber-b); border-bottom-left-radius: 4px; align-self: flex-start; color: #44260A; }
+.bbl.peer .bbl-lbl { color: var(--amber); }
+
+.typing { display: flex; gap: 4px; align-items: center; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; border-bottom-left-radius: 4px; align-self: flex-start; }
+.tdot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: td 1.2s infinite; }
+.tdot:nth-child(2) { animation-delay: .2s; }
+.tdot:nth-child(3) { animation-delay: .4s; }
+@keyframes td { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-4px);opacity:1} }
+
+/* TTS button */
+.tts-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border: 1px solid var(--border2); border-radius: 20px;
+  font-size: 11px; cursor: pointer; background: var(--surface);
+  color: var(--text3); margin-top: 6px; font-family: 'Noto Sans KR', sans-serif;
+  transition: all .15s;
+}
+.tts-btn:hover { background: var(--surface2); color: var(--text2); }
+.tts-btn.speaking { color: var(--accent); border-color: var(--accent-b); background: var(--accent-l); }
+
+/* Input */
+.input-area { padding: 14px 18px; border-top: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; gap: 8px; }
+.input-row { display: flex; gap: 7px; align-items: flex-end; }
+.input-row textarea {
+  flex: 1; padding: 9px 13px; border: 1px solid var(--border2); border-radius: 10px;
+  font-size: 14px; font-family: 'Noto Sans KR', sans-serif; resize: none;
+  min-height: 58px; color: var(--text); background: var(--surface); line-height: 1.5;
+  transition: border-color .15s;
+}
+.input-row textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(43,92,230,.07); }
+.input-row textarea::placeholder { color: var(--text3); }
+
+.mic-btn {
+  width: 52px; height: 58px; border: 1px solid var(--border2); border-radius: 10px;
+  background: var(--surface); font-size: 18px; cursor: pointer; flex-shrink: 0;
+  transition: all .15s; display: flex; align-items: center; justify-content: center;
+}
+.mic-btn:hover { background: var(--surface2); }
+.mic-btn.rec { background: var(--coral-l); border-color: var(--coral-b); animation: pulse .9s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(201,42,42,.15)} 50%{box-shadow:0 0 0 6px rgba(201,42,42,0)} }
+
+.send-btn {
+  height: 58px; padding: 0 18px; background: var(--accent); color: #fff;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 500;
+  font-family: 'Noto Sans KR', sans-serif; cursor: pointer; white-space: nowrap;
+  transition: all .15s;
+}
+.send-btn:hover { background: #2348CC; }
+.send-btn:disabled { background: var(--border2); cursor: default; }
+
+.voice-status { font-size: 12px; color: var(--coral); min-height: 18px; font-style: italic; }
+
+.pills { display: flex; gap: 5px; flex-wrap: wrap; }
+.pill {
+  padding: 5px 11px; border: 1px solid var(--border2); border-radius: 20px;
+  font-size: 12px; cursor: pointer; background: var(--surface); color: var(--text2);
+  transition: all .15s; font-family: 'Noto Sans KR', sans-serif;
+}
+.pill:hover { background: var(--accent-l); color: var(--accent); border-color: var(--accent-b); }
+
+/* Section toggles */
+.act-section { display: none; flex-direction: column; gap: 14px; }
+.act-section.on { display: flex; }
+.unit-panel { display: none; flex-direction: column; gap: 16px; }
+.unit-panel.on { display: flex; }
+
+/* Welcome */
+.welcome {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 40px 32px; text-align: center;
+}
+.welcome h3 { font-size: 18px; font-weight: 500; margin-bottom: 10px; }
+.welcome p { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+@media (max-width: 680px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .main { padding: 16px; }
+}
+
+/* ── PHASE TABS (탐구대화 / 답안작성 / 루브릭피드백) ── */
+.phase-tabs {
+  display: flex; gap: 0; border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden; background: var(--surface2);
+}
+.phase-tab {
+  flex: 1; padding: 10px 8px; font-size: 12px; font-weight: 500;
+  cursor: pointer; background: transparent; color: var(--text3);
+  border: none; border-right: 1px solid var(--border);
+  font-family: 'Noto Sans KR', sans-serif; transition: all .15s;
+  text-align: center; line-height: 1.4; display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.phase-tab:last-child { border-right: none; }
+.phase-tab.active { background: var(--surface); color: var(--accent); font-weight: 700; }
+.phase-tab.done { color: var(--green); }
+.phase-tab .phase-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border2);
+  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  color: var(--text3);
+}
+.phase-tab.active .phase-num { background: var(--accent); color: #fff; border-color: var(--accent); }
+.phase-tab.done .phase-num { background: var(--green); color: #fff; border-color: var(--green); }
+.phase-panel { display: none; flex-direction: column; gap: 14px; }
+.phase-panel.on { display: flex; }
+
+/* ── ANSWER EDITOR ── */
+.editor-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+}
+.editor-header {
+  padding: 12px 18px; background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.editor-header-left { display: flex; align-items: center; gap: 8px; }
+.editor-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.editor-hint { font-size: 11px; color: var(--text3); }
+.editor-body { padding: 0; }
+.answer-textarea {
+  width: 100%; min-height: 200px; padding: 18px;
+  border: none; outline: none; resize: vertical;
+  font-size: 14px; font-family: 'Noto Sans KR', sans-serif;
+  line-height: 1.9; color: var(--text); background: var(--surface);
+}
+.answer-textarea::placeholder { color: var(--text3); }
+.editor-footer {
+  padding: 12px 18px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--surface2);
+}
+.char-count { font-size: 11px; color: var(--text3); }
+.submit-btn {
+  padding: 9px 24px; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--r-sm); font-size: 14px; font-weight: 600;
+  font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all .15s;
+}
+.submit-btn:hover { background: #2348CC; transform: translateY(-1px); }
+.hint-toggle {
+  padding: 6px 14px; background: transparent; color: var(--text2);
+  border: 1px solid var(--border2); border-radius: var(--r-sm);
+  font-size: 12px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer;
+}
+
+/* ── FEEDBACK PANEL ── */
+.feedback-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+}
+.feedback-header {
+  padding: 14px 20px; background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.grade-badge {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 900; flex-shrink: 0;
+}
+.grade-A { background: var(--green-l); color: var(--green); border: 2px solid var(--green-b); }
+.grade-B { background: var(--accent-l); color: var(--accent); border: 2px solid var(--accent-b); }
+.grade-C { background: var(--amber-l); color: var(--amber); border: 2px solid var(--amber-b); }
+.grade-D { background: var(--coral-l); color: var(--coral); border: 2px solid var(--coral-b); }
+.grade-E { background: var(--surface2); color: var(--text3); border: 2px solid var(--border2); }
+.grade-info h4 { font-size: 15px; font-weight: 700; color: var(--text); }
+.grade-info p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+/* 3영역 피드백 */
+.fb-sections { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.fb-section {
+  border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden;
+}
+.fb-section-header {
+  padding: 9px 14px; display: flex; align-items: center; gap: 8px;
+  background: var(--surface2);
+}
+.fb-section-icon { font-size: 14px; }
+.fb-section-title { font-size: 12px; font-weight: 700; color: var(--text2); }
+.fb-section-score {
+  margin-left: auto; font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+}
+.score-good { background: var(--green-l); color: var(--green); }
+.score-mid { background: var(--amber-l); color: var(--amber); }
+.score-low { background: var(--coral-l); color: var(--coral); }
+.fb-section-body { padding: 11px 14px; font-size: 13px; color: var(--text2); line-height: 1.7; }
+.fb-next { 
+  margin-top: 8px; padding: 8px 12px;
+  background: var(--accent-l); border-radius: var(--r-sm);
+  font-size: 12px; color: var(--accent); font-weight: 500;
+  border-left: 3px solid var(--accent);
+}
+
+/* ── 등급별 예시 답안 비교 ── */
+.example-section { padding: 0 20px 20px; }
+.example-title {
+  font-size: 12px; font-weight: 700; color: var(--text3);
+  letter-spacing: .06em; text-transform: uppercase;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 14px;
+}
+.grade-ladder { display: flex; flex-direction: column; gap: 8px; }
+.grade-row {
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  overflow: hidden; cursor: pointer; transition: all .15s;
+}
+.grade-row:hover { border-color: var(--border2); }
+.grade-row.current { border-color: var(--amber-b); box-shadow: 0 0 0 2px var(--amber-l); }
+.grade-row.target { border-color: var(--accent-b); box-shadow: 0 0 0 2px var(--accent-l); }
+.grade-row-header {
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  background: var(--surface2);
+}
+.grade-lbl {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 900; flex-shrink: 0;
+}
+.grade-row-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+.grade-row-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; letter-spacing: .03em;
+}
+.badge-current { background: var(--amber-l); color: var(--amber); }
+.badge-target { background: var(--accent-l); color: var(--accent); }
+.grade-row-body {
+  padding: 0 14px; max-height: 0; overflow: hidden;
+  transition: max-height .3s ease, padding .3s ease;
+  font-size: 13px; color: var(--text2); line-height: 1.75;
+}
+.grade-row.open .grade-row-body { max-height: 400px; padding: 12px 14px; }
+.grade-row-missing {
+  margin-top: 8px; padding: 8px 10px;
+  background: var(--accent-l); border-radius: 6px;
+  font-size: 12px; color: var(--accent);
+  border-left: 3px solid var(--accent);
+}
+
+/* 재작성 버튼 */
+.rewrite-bar {
+  padding: 14px 20px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; background: var(--surface2);
+}
+.rewrite-btn {
+  flex: 1; padding: 10px; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--r-sm); font-size: 13px; font-weight: 600;
+  font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all .15s;
+}
+.rewrite-btn:hover { background: #2348CC; }
+.compare-btn {
+  padding: 10px 16px; background: transparent; color: var(--text2);
+  border: 1px solid var(--border2); border-radius: var(--r-sm);
+  font-size: 13px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer;
+}
+
+/* 내 답안 미리보기 */
+.my-answer-preview {
+  margin: 0 20px 16px; padding: 13px 15px;
+  background: var(--surface2); border-radius: var(--r-sm);
+  border-left: 3px solid var(--border2);
+}
+.my-answer-label { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+.my-answer-text { font-size: 13px; color: var(--text2); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">AI 수행평가</div>
+    <div>
+      <div class="nav-title">AI 수행평가 탐구소</div>
+      <div class="nav-sub">서울시교육청 성취기준·루브릭 기반 수행평가 연습</div>
+    </div>
+  </div>
+</nav>
+
+<div id="api-banner" class="api-banner" style="background:var(--teal-l);border-bottom-color:var(--teal-b)">
+  <span style="color:var(--teal);font-weight:600">✦ 데모 모드</span>
+  <span style="color:#0f5f58;font-size:13px">API 연동 없이 전체 학습 흐름을 체험할 수 있습니다. 왼쪽에서 <b>중1 → I. 소인수분해</b>를 선택해보세요.</span>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-section-label">과목</div>
+      <div class="subject-tabs">
+        <button class="subj-btn active" id="subj-math" onclick="setSubject('math',this)">수학</button>
+        <button class="subj-btn" id="subj-social" onclick="setSubject('social',this)">사회</button>
+        <button class="subj-btn" id="subj-science" onclick="setSubject('science',this)">과학</button>
+        <button class="subj-btn disabled" title="준비 중" id="subj-korean">국어<span class="soon">준비중</span></button>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-section-label">단원 선택</div>
+      <div class="tree" id="unit-tree">
+        <!-- 초5 -->
+        <div class="tree-grade" onclick="toggleGrade(this)">
+          <span class="arrow">▶</span> 초등 5학년
+        </div>
+        <div class="tree-units">
+          <button class="unit-btn" onclick="selectElemUnit('e5-1',this)">
+            2. 약수와 배수
+            <span class="unit-sub">배수·공배수·최소공배수 / 서술형+동료평가</span>
+          </button>
+          <button class="unit-btn disabled" style="opacity:.45;cursor:default">
+            6. 평균과 가능성
+            <span class="unit-sub">준비중</span>
+          </button>
+        </div>
+        <!-- 초6 -->
+        <div class="tree-grade" onclick="toggleGrade(this)">
+          <span class="arrow">▶</span> 초등 6학년
+        </div>
+        <div class="tree-units">
+          <button class="unit-btn" onclick="selectElemUnit('e6-1',this)">
+            2. 각기둥과 각뿔
+            <span class="unit-sub">전개도 조건 설명 / 논술형</span>
+          </button>
+          <button class="unit-btn disabled" style="opacity:.45;cursor:default">
+            4. 비례식과 비례배분
+            <span class="unit-sub">준비중</span>
+          </button>
+        </div>
+        <!-- 중1 -->
+        <div class="tree-grade" onclick="toggleGrade(this)" style="color:var(--teal);font-weight:600">
+          <span class="arrow">▶</span> 중학교 1학년 <span class="soon" style="background:var(--teal-l);color:var(--teal);border:1px solid var(--teal-b)">NEW</span>
+        </div>
+        <div class="tree-units">
+          <button class="unit-btn" onclick="selectMiddleUnit('m1-1',this)">
+            I. 소인수분해
+            <span class="unit-sub">서술형 · AI 탐구→답안→루브릭 피드백</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="sidebar-rubric" style="display:none">
+      <div class="sidebar-section-label">성취수준</div>
+      <div class="rubric-box" id="rubric-content"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main-area">
+    <div class="welcome" id="welcome-msg">
+      <h3>✦ AI 수행평가 탐구소 데모</h3>
+      <p style="line-height:2">왼쪽에서 단원을 선택하면 체험이 시작돼요.<br><br>
+      <span style="display:inline-block;background:var(--accent-l);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:4px">초등 5학년 · 약수와 배수</span><br>
+      <span style="display:inline-block;background:var(--teal-l);color:var(--teal);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:4px">초등 6학년 · 각기둥과 각뿔</span><br>
+      <span style="display:inline-block;background:var(--green-l);color:var(--green);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600">중학교 1학년 · 소인수분해</span><br><br>
+      <span style="font-size:13px;color:var(--text3)">AI 탐구 대화 → 답안 작성 → 성취수준 피드백 순서로 체험할 수 있어요.</span>
+      </p>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── STATE ──
+const S = {
+  apiKey: localStorage.getItem('anthropic_api_key') || '',
+  unit: null,
+  act: {},      // unit -> actId
+  history: {},  // unit+act -> messages
+  step: {},
+  loading: false,
+  recog: null,
+  speaking: false
+};
+
+// ── API KEY ──
+function saveKey() {
+  const v = document.getElementById('api-key-input').value.trim();
+  if (!v) return;
+  S.apiKey = v;
+  localStorage.setItem('anthropic_api_key', v);
+  showKeyOk();
+}
+function showKeyOk() {
+  const b = document.getElementById('api-banner');
+  b.style.background = '#EBFBEE'; b.style.borderBottomColor = '#B2F2BB';
+  b.innerHTML = '<span style="color:#2D9E44;font-size:13px">✓ API 키 저장 완료 — AI 선생님과 바로 연습할 수 있어요!</span><button onclick="resetKey()" style="padding:4px 10px;background:transparent;border:1px solid #B2F2BB;border-radius:6px;font-size:12px;color:#2D9E44;cursor:pointer;font-family:inherit">키 변경</button>';
+}
+function resetKey() { localStorage.removeItem('anthropic_api_key'); location.reload(); }
+if (S.apiKey) showKeyOk();
+
+// ── SIDEBAR ──
+function setSubject(id, el) {
+  document.querySelectorAll('.subj-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  S.subject = id;
+
+  const tree = document.getElementById('unit-tree');
+  const welcome = document.getElementById('welcome-msg');
+  const main = document.getElementById('main-area');
+  const rubric = document.getElementById('sidebar-rubric');
+
+  // Reset main area
+  if (rubric) rubric.style.display = 'none';
+  if (main) {
+    main.innerHTML = `<div class="welcome" id="welcome-msg">
+      <h3>왼쪽에서 단원을 선택해주세요</h3>
+      <p>${id === 'math' ? '5·6학년 수학 수행평가 기준안을 바탕으로<br>AI 선생님과 함께 서술형·동료평가를 미리 연습할 수 있어요.' :
+         id === 'science' ? '중학교 1학년 과학 수행평가 기준안을 바탕으로<br>AI 선생님과 함께 탐구·실험 설계를 연습할 수 있어요.' :
+         '중학교 3학년 사회 수행평가 기준안을 바탕으로<br>AI 선생님과 함께 인권 침해 사례를 분석하고 역할극을 준비해요.'}<br><br>말하기(🎤) 버튼을 누르면 음성으로도 답할 수 있어요!</p>
+    </div>`;
+  }
+
+  if (id === 'math') {
+    tree.innerHTML = `
+      <div class="tree-grade" onclick="toggleGrade(this)">
+        <span class="arrow">▶</span> 5학년
+      </div>
+      <div class="tree-units">
+        <button class="unit-btn" onclick="selectUnit('m5-1',this)">2. 약수와 배수<span class="unit-sub">배수·공배수·최소공배수 / 서술형+동료평가</span></button>
+        <button class="unit-btn" onclick="selectUnit('m5-2',this)">6. 평균과 가능성<span class="unit-sub">가능성 예상과 판단 / 토의·토론+서술형</span></button>
+      </div>
+      <div class="tree-grade" onclick="toggleGrade(this)">
+        <span class="arrow">▶</span> 6학년
+      </div>
+      <div class="tree-units">
+        <button class="unit-btn" onclick="selectUnit('m6-1',this)">2. 각기둥과 각뿔<span class="unit-sub">전개도 그리기 / 논술형</span></button>
+        <button class="unit-btn" onclick="selectUnit('m6-2',this)">4. 비례식과 비례배분<span class="unit-sub">실생활 문제 해결 / 서술형+동료평가</span></button>
+      </div>
+      <div class="tree-grade" onclick="toggleGrade(this)" style="color:var(--teal);font-weight:600">
+        <span class="arrow">▶</span> 중1 <span class="soon" style="background:var(--teal-l);color:var(--teal);border:1px solid var(--teal-b)">NEW</span>
+      </div>
+      <div class="tree-units">
+        <button class="unit-btn" onclick="selectMiddleUnit('m1-1',this)">I. 소인수분해<span class="unit-sub">서술형 · AI 탐구→답안→루브릭 피드백</span></button>
+      </div>`;
+  } else if (id === 'science') {
+    tree.innerHTML = `
+      <div class="tree-grade open" onclick="toggleGrade(this)" style="color:var(--teal);font-weight:600">
+        <span class="arrow">▶</span> 중1 <span class="soon" style="background:var(--teal-l);color:var(--teal);border:1px solid var(--teal-b)">NEW</span>
+      </div>
+      <div class="tree-units">
+        <button class="unit-btn" onclick="selectScienceUnit('s1-1',this)">05. 여러 가지 혼합물의 분리<span class="unit-sub">실험설계·탐구 / 보고서+관찰평가</span></button>
+      </div>`;
+  } else if (id === 'social') {
+    tree.innerHTML = `
+      <div class="tree-grade open" onclick="toggleGrade(this)" style="color:var(--purple);font-weight:600">
+        <span class="arrow">▶</span> 중3 <span class="soon" style="background:var(--purple-l);color:var(--purple);border:1px solid var(--purple-b)">NEW</span>
+      </div>
+      <div class="tree-units">
+        <button class="unit-btn" onclick="selectSocialUnit('so3-1',this)">06. 인권 침해 문제를 다루는 역할극<span class="unit-sub">프로젝트 / 역할극+사례분석</span></button>
+      </div>`;
+  }
+}
+function toggleGrade(el) {
+  el.classList.toggle('open');
+}
+
+// ── UNIT DATA ──
+const UNITS = {
+  'm5-1': {
+    title: '약수와 배수', grade: '5학년', semester: '1학기',
+    area: '수와 연산', time: '4월', method: '서술형, 동료평가',
+    rubric: [
+      ['매우잘함', '배수·공배수·최소공배수를 여러 방법으로 구하고 관계를 설명할 수 있다.'],
+      ['잘함', '배수·공배수·최소공배수를 구할 수 있다.'],
+      ['보통', '간단한 수의 배수·공배수·최소공배수를 구할 수 있다.'],
+      ['노력요함', '안내된 절차로 간단한 수의 배수를 구할 수 있다.'],
+    ],
+    acts: [
+      {
+        id: 'a1', label: '활동 1', sublabel: '배수 개념 이해', tag: 'tag-blue',
+        tagText: '활동 1 · 서술형',
+        title: '배수의 의미 탐색하기',
+        body: `구체적인 상황을 이용해 <span class="hl">배수의 의미</span>를 설명해보세요.<br><br>
+예) 사람 3명에게 물건을 똑같이 나눠줄 때, 필요한 물건의 수는 3의 배수입니다.<br>
+<span style="font-size:13px;color:var(--text2)">3을 1배, 2배, 3배,... 한 수가 왜 3의 배수인지, 곱셈식으로 설명해보세요.</span>`,
+        meta: '성취기준: [6수01-05] · 평가영역: 수와 연산 · 4월',
+        placeholder: '배수의 의미를 설명해보세요\n예) 3×4=12이므로 12는 3의 배수입니다\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '배수 뜻이 뭔가요?', '곱셈식으로 설명', '내 답 확인해줘', '👥 동료 평가'],
+        pillKeys: ['hint','def','mult','check','peer'],
+        steps: ['배수 탐색', '곱셈식 연결', '설명 완성', '동료 평가'],
+        system: `당신은 초등학교 5학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 배수의 의미 이해하기 (서술형)
+핵심 내용:
+- 배수: 어떤 수를 1배, 2배, 3배,... 한 수 (예: 3의 배수 → 3,6,9,12,...)
+- 곱셈식 활용: 3×1=3, 3×2=6, ... → 12=3×4이므로 12는 3의 배수
+- 실생활 연결: 물건 나눠주기, 줄서기 등
+지도 방침:
+- 답을 바로 알려주지 말고 단계별로 유도하세요.
+- 구체물/실생활 상황에서 배수의 의미를 먼저 찾도록 도우세요.
+- 학생 답변에 무엇이 맞고 무엇을 보완해야 하는지 구체적으로 피드백하세요.
+- 동료평가 요청 시: 잘한 점 1가지와 보완할 점 1가지를 친구 입장에서 말해주세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      },
+      {
+        id: 'a2', label: '활동 2', sublabel: '공배수·최소공배수', tag: 'tag-purple',
+        tagText: '활동 2 · 서술형+동료평가',
+        title: '공배수와 최소공배수의 관계 설명하기',
+        body: `<span class="hl">2와 3의 공배수</span>를 찾고, 그 중 <span class="hl">최소공배수</span>를 구해보세요.<br><br>
+그리고 공배수와 최소공배수는 어떤 관계인지 친구에게 설명하듯 써보세요.<br>
+<span style="font-size:13px;color:var(--text2)">예) 6과 8의 최소공배수를 구하고, 최소공배수의 배수와 공배수를 비교해보세요.</span>`,
+        meta: '성취기준: [6수01-05] · 평가방법: 서술형, 동료평가 · 4월',
+        placeholder: '공배수와 최소공배수를 구하고 관계를 설명해보세요\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '공배수가 뭔가요?', '최소공배수 구하는 법', '관계 설명해줘', '👥 동료 평가'],
+        pillKeys: ['hint','lcm_def','lcm_how','rel','peer'],
+        steps: ['공배수 찾기', '최소공배수', '관계 설명', '동료 평가'],
+        system: `당신은 초등학교 5학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 공배수와 최소공배수의 관계 (서술형+동료평가)
+핵심 내용:
+- 공배수: 두 수의 공통된 배수 (예: 2와 3의 공배수 → 6, 12, 18, ...)
+- 최소공배수: 공배수 중 가장 작은 수 (예: 2와 3의 최소공배수 → 6)
+- 핵심 관계: 공배수 = 최소공배수의 배수 (6의 배수가 곧 2와 3의 공배수)
+- 여러 방법: 배수 나열법, 곱셈식 이용법
+지도 방침:
+- 답을 바로 알려주지 말고 단계별로 유도하세요.
+- 공배수와 최소공배수를 직접 나열해서 찾아보도록 유도하세요.
+- 두 개념의 관계를 논리적으로 설명하도록 격려하세요.
+- 동료평가: 설명의 논리성, 근거 제시 여부를 평가하세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      }
+    ]
+  },
+
+  'm5-2': {
+    title: '평균과 가능성', grade: '5학년', semester: '2학기',
+    area: '자료와 가능성', time: '12월', method: '토의·토론, 서술형',
+    rubric: [
+      ['매우잘함', '자료를 보고 가능성을 예상하며, 근거를 들어 적절한 판단을 설명할 수 있다.'],
+      ['잘함', '자료를 보고 가능성을 예상하고, 근거로 적절한 판단을 내릴 수 있다.'],
+      ['보통', '자료를 보고 가능성을 예상할 수 있다.'],
+      ['노력요함', '안내된 절차에 따라 가능성을 예상할 수 있다.'],
+    ],
+    acts: [
+      {
+        id: 'a1', label: '활동 1', sublabel: '가능성 토의·토론', tag: 'tag-blue',
+        tagText: '활동 1 · 토의·토론',
+        title: '일이 일어날 가능성 예상하기',
+        body: `동전을 던졌을 때 앞면이 나올 가능성은 얼마일까요?<br><br>
+가능성을 <span class="hl">수(0, 1/2, 1)</span> 또는 <span class="hl">말(확실하다 / ~일 것 같다 / 반반이다 / ~아닐 것 같다 / 불가능하다)</span>로 표현하고, 왜 그렇게 생각하는지 근거를 설명해보세요.<br><br>
+<span style="font-size:13px;color:var(--text2)">주사위를 던졌을 때 7이 나올 가능성, 상자에서 빨간 공이 나올 가능성도 함께 생각해보세요.</span>`,
+        meta: '성취기준: [6수04-04][6수04-05] · 평가영역: 자료와 가능성 · 12월',
+        placeholder: '가능성을 수나 말로 표현하고 근거를 설명해보세요\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '가능성을 수로?', '가능성을 말로?', '내 설명 확인', '👥 동료 토론'],
+        pillKeys: ['hint','num','word','check','peer'],
+        steps: ['가능성 표현', '근거 설명', '비교·토의', '동료 평가'],
+        system: `당신은 초등학교 5학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 일이 일어날 가능성 예상하기 (토의·토론)
+핵심 내용:
+- 가능성의 수 표현: 0(불가능), 1/2(반반), 1(확실)
+- 가능성의 말 표현: 확실하다 / ~일 것 같다 / 반반이다 / ~아닐 것 같다 / 불가능하다
+- 동전: 앞면=1/2(반반이다), 주사위 7=0(불가능하다), 주사위 1~6=1(확실하다)
+지도 방침:
+- 학생이 수와 말 표현을 모두 사용하도록 유도하세요.
+- 근거를 들어 논리적으로 설명하도록 격려하세요.
+- 같은 상황도 관점에 따라 표현이 다를 수 있음을 인식하게 하세요.
+- 동료평가: 근거의 논리성, 수와 말 표현의 정확성을 평가하세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      },
+      {
+        id: 'a2', label: '활동 2', sublabel: '가능성으로 판단', tag: 'tag-teal',
+        tagText: '활동 2 · 서술형',
+        title: '가능성을 근거로 판단하기 (돌림판)',
+        body: `돌림판 <span class="hl">가</span>에는 숫자 1이 2칸, 숫자 2가 6칸 있습니다.<br>
+돌림판 <span class="hl">나</span>에는 숫자 1이 6칸, 숫자 2가 2칸 있습니다.<br><br>
+숫자 <span class="hl">1</span>이 나오길 원할 때, 어떤 돌림판을 선택할지 고르고<br>가능성에 근거하여 이유를 설명해보세요.`,
+        meta: '성취기준: [6수04-06] · 평가방법: 서술형 · 12월',
+        placeholder: '돌림판을 고른 이유를 가능성에 근거하여 설명해보세요\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '가능성 계산법', '돌림판 분석', '내 답 확인', '👥 동료 평가'],
+        pillKeys: ['hint','calc','analyze','check','peer'],
+        steps: ['가능성 계산', '돌림판 선택', '이유 설명', '동료 평가'],
+        system: `당신은 초등학교 5학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 가능성을 근거로 판단하기 (서술형)
+핵심 내용:
+- 돌림판 가: 숫자 1=2칸(전체 8칸 중), 숫자 2=6칸 → 1이 나올 가능성=2/8=1/4(반반보다 낮다)
+- 돌림판 나: 숫자 1=6칸, 숫자 2=2칸 → 1이 나올 가능성=6/8=3/4(반반보다 높다)
+- 결론: 숫자 1을 원하면 나 돌림판 선택이 유리
+지도 방침:
+- 학생이 각 돌림판의 가능성을 수치로 계산하도록 유도하세요.
+- 판단에 구체적인 근거(수치)를 들어 설명하도록 격려하세요.
+- 단순히 "나 돌림판"이라고 답하는 것에 그치지 않고 왜 그런지 수학적으로 설명하게 하세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      }
+    ]
+  },
+
+  'm6-1': {
+    title: '각기둥과 각뿔', grade: '6학년', semester: '1학기',
+    area: '도형과 측정', time: '4월', method: '논술형',
+    rubric: [
+      ['매우잘함', '전개도 가능·불가능을 논리적으로 설명하고, 조건에 맞게 여러 모양으로 그릴 수 있다.'],
+      ['잘함', '전개도 가능·불가능을 구별하고 전개도를 그릴 수 있다.'],
+      ['보통', '전개도 가능·불가능을 구별하고, 일부가 주어진 전개도를 완성할 수 있다.'],
+      ['노력요함', '조작 활동을 통해 가능·불가능을 구별하고 안내에 따라 완성할 수 있다.'],
+    ],
+    acts: [
+      {
+        id: 'a1', label: '활동 1', sublabel: '문제 상황 확인', tag: 'tag-blue',
+        tagText: '활동 1 · 논술형',
+        title: '전개도 조건 설명하기',
+        body: `포장 용기를 만들기 위해 각기둥의 전개도를 설계하려 합니다.<br><br>
+각기둥의 전개도가 되기 위한 조건을 설명하고,<br>
+<span class="hl">전개도가 되는 것</span>과 <span class="hl">되지 않는 것</span>을 어떻게 구별하는지 설명해보세요.<br><br>
+<span style="font-size:13px;color:var(--text2)">설계 기준: ①각기둥 모양 ②밑면을 다각형 중 선택 ③가방/서랍에 들어갈 크기 ④색깔로 옆면·밑면·높이 표시</span>`,
+        meta: '성취기준: [6수03-06] · 평가영역: 도형과 측정 · 4월',
+        placeholder: '각기둥 전개도의 조건과 구별 방법을 설명해보세요\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '전개도 조건이 뭔가요?', '접었을 때 확인법', '내 설명 확인', '예시 전개도'],
+        pillKeys: ['hint','cond','fold','check','example'],
+        steps: ['조건 파악', '구별 방법', '설명 완성', '성찰'],
+        system: `당신은 초등학교 6학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 각기둥 전개도 그리기 (논술형)
+핵심 내용:
+- 전개도 조건: ①두 밑면이 합동인 다각형 ②옆면이 모두 직사각형 ③접었을 때 겹치지 않고 각기둥이 됨
+- 불가능한 경우: 밑면 위치 잘못, 옆면 크기 불일치, 접으면 틈이 생기는 경우
+- 포장 용기 설계: 담을 물건 크기 → 밑면 선택 → 높이 결정 → 전개도 그리기
+지도 방침:
+- 학생이 전개도 조건을 스스로 발견하도록 유도하세요.
+- 이유를 논리적으로 설명하도록 격려하세요.
+- 구체적인 다각형(삼각형, 사각형 등)으로 예시를 들어 설명하게 하세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      },
+      {
+        id: 'a2', label: '활동 2', sublabel: '전개도 설계', tag: 'tag-purple',
+        tagText: '활동 2 · 논술형',
+        title: '포장 용기 전개도 만들기',
+        body: `내가 포장하고 싶은 물건을 하나 정하고,<br>그 물건에 맞는 <span class="hl">각기둥 전개도</span>를 구상해보세요.<br><br>
+다음 조건을 충족하는지 확인하세요:<br>
+<span style="font-size:13px;color:var(--text2)">① 문제 상황이 해결되는가? ② 옆면·밑면·높이 길이가 표시되었는가?<br>③ 접었을 때 실제로 각기둥이 되는가?</span>`,
+        meta: '성취기준: [6수03-06] · 평가방법: 논술형 · 4월',
+        placeholder: '어떤 물건을 담을지, 밑면 모양은 무엇인지, 어떻게 설계할지 설명해보세요\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '밑면 선택 방법', '전개도 그리는 순서', '내 설계 확인', '👥 동료 검토'],
+        pillKeys: ['hint','base','order','check','peer'],
+        steps: ['물건 선택', '전개도 설계', '조건 확인', '성찰'],
+        system: `당신은 초등학교 6학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 포장 용기 전개도 설계하기 (논술형)
+핵심 내용:
+- 설계 순서: ①담을 물건 정하기 → ②크기·모양 확인 → ③밑면 다각형 선택 → ④높이 결정 → ⑤전개도 그리기
+- 확인 사항: 접었을 때 겹침 없이 각기둥이 되는지, 크기가 물건에 맞는지
+- 수정 방법: 옆면 수, 연결 순서, 밑면 위치 조정
+지도 방침:
+- 학생이 담을 물건부터 구체적으로 상상하도록 유도하세요.
+- 전개도 조건(밑면 2개+옆면)을 단계별로 확인하게 하세요.
+- 설명이 논리적이고 수학적 용어(밑면, 옆면, 높이, 모서리)를 사용하는지 확인하세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      }
+    ]
+  },
+
+  'm6-2': {
+    title: '비례식과 비례배분', grade: '6학년', semester: '2학기',
+    area: '변화와 관계', time: '11월', method: '서술형, 동료평가',
+    rubric: [
+      ['매우잘함', '실생활 문제를 비례식·비례배분으로 정확히 해결하고 방법을 설명할 수 있다.'],
+      ['잘함', '실생활 문제를 비례식·비례배분으로 정확히 해결할 수 있다.'],
+      ['보통', '비례식·비례배분을 이용하여 문제를 해결할 수 있다.'],
+      ['노력요함', '비례식의 성질이나 비례배분의 의미를 간단하게 말할 수 있다.'],
+    ],
+    acts: [
+      {
+        id: 'a1', label: '활동 1', sublabel: '실생활 문제 해결', tag: 'tag-blue',
+        tagText: '활동 1 · 서술형',
+        title: '비례식과 비례배분으로 환전 계산하기',
+        body: `현재 환율은 <span class="hl">1달러 = 1,200원</span>입니다.<br>
+여행 예산 <span class="hl">140,000원</span>을 달러로 환전하면 얼마가 될까요?<br><br>
+비례식을 세우고, 비례식의 성질(외항의 곱 = 내항의 곱)을 이용해 구해보세요.<br>
+그 다음, 환전한 달러를 숙박비 : 식비 = <span class="hl">6 : 4</span>로 비례배분해보세요.`,
+        meta: '성취기준: [6수02-04][6수02-05] · 평가영역: 변화와 관계 · 11월',
+        placeholder: '비례식을 세우고 풀이 과정을 적어보세요\n예) 1:1200 = □:140000\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '비례식 형태', '비례식의 성질', '비례배분 방법', '내 풀이 확인'],
+        pillKeys: ['hint','form','prop','dist','check'],
+        steps: ['비례식 세우기', '풀이 과정', '비례배분', '피드백'],
+        system: `당신은 초등학교 6학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 비례식과 비례배분으로 실생활 문제 해결 (서술형)
+핵심 내용:
+- 비례식: 1:1200 = □:140000
+- 비례식의 성질: 외항의 곱 = 내항의 곱 → 1×140000 = 1200×□ → □ = 140000÷1200 ≈ 116.67달러
+- 비례배분: 116.67 × 6/10 = 70달러(숙박), 116.67 × 4/10 = 46.67달러(식비)
+지도 방침:
+- 답을 바로 알려주지 말고 단계별로 유도하세요.
+- 비례식을 먼저 세우도록 하고, 그 다음 성질을 이용하도록 하세요.
+- 비례배분은 분수 형태로 설명하도록 격려하세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      },
+      {
+        id: 'a2', label: '활동 2', sublabel: '조건 변화 예측', tag: 'tag-purple',
+        tagText: '활동 2 · 서술형+동료평가',
+        title: '환율 변화에 따른 비례식 세우기 및 예측',
+        body: `환율이 <span class="hl-g">1달러 = 1,400원</span>으로 올랐습니다.<br>
+새 환율로 140,000원을 환전하면 달러가 얼마가 되나요?<br><br>
+활동 1과 비교하여 <span class="hl">달러가 얼마나 줄었는지</span> 수치로 분석하고,<br>
+환율이 오르면 어떤 일이 생기는지 친구에게 설명하듯 써보세요.`,
+        meta: '성취기준: [6수02-04][6수02-05] · 평가방법: 서술형, 동료평가 · 11월',
+        placeholder: '새 비례식을 세우고, 활동1과 비교·분석해보세요\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '새 비례식 세우기', '달러 변화 분석', '친구에게 설명', '👥 동료 평가'],
+        pillKeys: ['hint','newform','analyze','explain','peer'],
+        steps: ['새 비례식', '변화 분석', '설명 완성', '동료 평가'],
+        system: `당신은 초등학교 6학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 조건 변화에 따른 비례식 및 예측 (서술형+동료평가)
+핵심 내용:
+- 새 비례식: 1:1400 = □:140000 → □ = 140000÷1400 = 100달러
+- 활동1과 비교: 116.67달러 → 100달러 (약 16.67달러 감소)
+- 비례배분 재계산: 100 × 6/10 = 60달러(숙박), 100 × 4/10 = 40달러(식비)
+- 결론: 환율이 오르면 같은 원화로 받을 수 있는 달러가 줄어 구매력 하락
+지도 방침:
+- 학생이 두 상황을 직접 비교하도록 유도하세요.
+- 수치로 구체적으로 분석하도록 격려하세요.
+- 친구에게 설명하는 연습 시 수학적 표현(식, 수치)을 사용하도록 하세요.
+- 동료평가: 설명의 명확성, 수식 사용, 결론 제시를 평가하세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      },
+      {
+        id: 'a3', label: '활동 3', sublabel: '전략 수정 설명', tag: 'tag-green',
+        tagText: '활동 3 · 서술형',
+        title: '비례배분 전략 수정하고 검증하기',
+        body: `줄어든 예산(100달러)으로도 좋은 여행을 하기 위해<br>숙박비와 식비 비율을 직접 조정해보세요.<br><br>
+예) 기존 6:4 → 새로운 비율 <span class="hl">7:3</span> 또는 다른 비율<br><br>
+<span style="font-size:13px;color:var(--text2)">수정한 비율을 비례배분으로 계산하고, 왜 이 비율이 더 좋은지 합리적인 근거를 들어 설명해보세요. 영역별 합이 총예산과 일치하는지도 확인하세요.</span>`,
+        meta: '성취기준: [6수02-05] · 평가방법: 서술형 · 11월',
+        placeholder: '새 비율을 정하고, 비례배분으로 계산한 뒤 이유를 설명해보세요\nEnter 전송 / Shift+Enter 줄바꿈',
+        pills: ['💡 힌트', '비율 조정 방법', '검증하는 법', '내 전략 확인', '최종 성찰'],
+        pillKeys: ['hint','adjust','verify','check','reflect'],
+        steps: ['비율 조정', '비례배분 계산', '근거 설명', '성찰'],
+        system: `당신은 초등학교 6학년 수학 수행평가를 도와주는 친절한 AI 선생님입니다.
+주제: 비례배분 전략 수정 및 검증 (서술형)
+핵심 내용:
+- 총예산: 100달러 (환율 1400원 기준)
+- 예시) 7:3으로 조정: 100 × 7/10 = 70달러(숙박), 100 × 3/10 = 30달러(식비)
+- 검증: 70+30=100달러 (총예산 일치 확인)
+- 합리적 근거: 여행 목적, 숙박 중요도, 식비 절약 가능 여부 등
+지도 방침:
+- 학생이 직접 비율을 정하고 계산하도록 유도하세요.
+- 계산 후 총합이 맞는지 스스로 검증하게 하세요.
+- 비율 선택의 이유를 수학적+실생활 근거로 설명하도록 격려하세요.
+- 한국어로, 초등학생에게 친근하게 말해주세요.`
+      }
+    ]
+  }
+};
+
+// ── 중학교 단원 데이터 ──
+const M_UNITS = {
+  'm1-1': {
+    title: '소인수분해', grade: '중1', semester: '1학기',
+    area: '수와 연산', time: '4월', method: '서술형',
+    rubric5: [
+      { grade: 'A', cls: 'grade-A', lv: 'lv-a',
+        summary: '소인수분해의 뜻을 설명하고 과정을 단계별로 서술하며 유용성을 실생활과 연결',
+        answer: '소인수분해란 1보다 큰 자연수를 더 이상 나눌 수 없는 소수들의 곱으로 나타내는 것입니다. 여기서 소수란 1과 자기 자신만을 약수로 가지는 수로, 2, 3, 5, 7 등이 있습니다.\n\n48을 소인수분해하는 과정은 다음과 같습니다. 가장 작은 소수인 2로 나누는 것부터 시작합니다. 48÷2=24, 24÷2=12, 12÷2=6, 6÷2=3. 3은 소수이므로 더 이상 나눌 수 없습니다. 따라서 48 = 2⁴×3 입니다.\n\n소인수분해는 최대공약수와 최소공배수를 구할 때 매우 유용합니다. 예를 들어 48과 36의 최대공약수를 구할 때, 36 = 2²×3²로 분해하면 공통 소인수의 가장 작은 지수를 골라 2²×3 = 12라는 최대공약수를 빠르게 구할 수 있습니다.',
+        missing: null },
+      { grade: 'B', cls: 'grade-B', lv: 'lv-b',
+        summary: '소인수분해의 뜻을 알고 과정을 단계별로 서술할 수 있으나 유용성 연결이 없음',
+        answer: '소인수분해는 1보다 큰 자연수를 소수들의 곱으로 나타내는 것입니다.\n\n48을 소인수분해하는 과정은 다음과 같습니다. 48을 2로 나누면 24, 24를 2로 나누면 12, 12를 2로 나누면 6, 6을 2로 나누면 3이 됩니다. 3은 소수이므로 더 이상 나눌 수 없습니다. 따라서 48 = 2⁴×3 입니다.',
+        missing: '✦ A로 올리려면: 소인수분해가 최대공약수·최소공배수를 구할 때 어떻게 활용되는지 구체적인 예시를 추가하세요.' },
+      { grade: 'C', cls: 'grade-C', lv: 'lv-c',
+        summary: '소인수분해의 뜻은 알고 결과를 쓸 수 있으나 분해 과정 서술이 없음',
+        answer: '소인수분해는 자연수를 소수들의 곱으로 나타내는 것입니다. 48 = 2×2×2×2×3 입니다.',
+        missing: '✦ B로 올리려면: 48을 어떻게 단계별로 나눴는지 과정을 순서대로 써야 합니다. 48÷2=24, 24÷2=12... 처럼 각 단계를 보여주세요.' },
+      { grade: 'D', cls: 'grade-D', lv: 'lv-d',
+        summary: '소인수분해의 뜻이 부정확하고 결과만 있으며 과정이 없음',
+        answer: '소인수분해는 숫자를 작은 수들로 나누는 것입니다. 48 = 2×2×2×2×3 입니다.',
+        missing: '✦ C로 올리려면: "작은 수들로 나누는 것"이 아니라 "소수들의 곱으로 나타내는 것"으로 정확히 써야 합니다. 소수의 정의도 함께 확인하세요.' },
+      { grade: 'E', cls: 'grade-E', lv: 'lv-d',
+        summary: '소인수분해 뜻 설명이 없고 분해가 불완전함',
+        answer: '48을 소인수분해하면 2×24 입니다.',
+        missing: '✦ D로 올리려면: 소인수분해가 무엇인지 정의부터 써야 합니다. 그리고 2×24에서 24도 소수가 아니므로 계속 나눠야 합니다.' },
+    ],
+    fbTemplate: {
+      grade: 'C',
+      areas: [
+        { icon: '📘', title: '지식·이해', score: '보통', scoreCls: 'score-mid',
+          text: '소인수분해의 정의를 정확하게 썼어요. "자연수를 소수들의 곱으로 나타내는 것"이라는 핵심 개념을 담고 있습니다.',
+          next: '소수가 무엇인지 정의도 한 문장 추가하면 더 완성도가 높아져요.' },
+        { icon: '⚙️', title: '과정·기능', score: '미흡', scoreCls: 'score-low',
+          text: '48 = 2×2×2×2×3이라는 결과는 맞지만, 어떻게 이 답을 구했는지 단계별 과정이 없어요. 채점 기준에서 "과정을 설명할 수 있다"가 핵심 요소입니다.',
+          next: '→ 다음 행동: 48÷2=24, 24÷2=12... 처럼 각 나눗셈 단계를 순서대로 써보세요.' },
+        { icon: '💡', title: '가치·태도', score: '미흡', scoreCls: 'score-low',
+          text: '소인수분해가 왜 필요한지, 어디에 쓰이는지에 대한 내용이 없어요.',
+          next: '→ 다음 행동: 최대공약수나 최소공배수를 구할 때 어떻게 활용되는지 한 문장이라도 추가해보세요.' },
+      ]
+    },
+    acts: [{
+      id: 'a1', label: '탐구 1', sublabel: '소인수분해 원리', tag: 'tag-blue',
+      tagText: '서술형 · 중1',
+      title: '소인수분해의 뜻을 설명하고 48을 소인수분해 하는 과정을 서술하시오.',
+      body: `<span class="hl">소인수분해</span>의 뜻을 설명하고, <span class="hl">48</span>을 소인수분해 하는 <span class="hl">과정</span>을 단계별로 서술하시오.<br><br>
+<span style="font-size:12px;color:var(--text3)">평가 요소: ① 소인수분해의 뜻 설명 ② 소인수분해 과정 서술 ③ 수학적 유용성 인식<br>성취기준: [9수01-01] [9수01-02] · 평가 방법: 서술형 · 평가 시기: 4월</span>`,
+      placeholder: '소인수분해의 뜻을 설명하고 48을 분해하는 과정을 단계별로 써보세요.\nEnter 전송 / Shift+Enter 줄바꿈',
+      pills: ['소수가 뭔가요?', '어디서 시작하나요?', '분해 과정 도와줘', '내 답 확인해줘'],
+      pillKeys: ['prime','start','process','check'],
+      system: `당신은 중학교 1학년 수학 수행평가를 도와주는 AI 튜터입니다.
+
+【 성취기준 】
+[9수01-01] 소인수분해의 뜻을 알고, 자연수를 소인수분해할 수 있다.
+[9수01-02] 소인수분해를 이용하여 최대공약수와 최소공배수를 구할 수 있다.
+
+【 A~E 성취수준 】
+A: 소인수분해의 뜻을 설명하고 과정을 단계별로 서술하며 유용성을 실생활과 연결
+B: 뜻을 알고 과정을 단계별로 서술할 수 있음 (유용성 없음)
+C: 뜻은 알고 결과를 쓸 수 있으나 과정 서술 없음
+D: 뜻이 부정확하고 결과만 있음
+E: 뜻 설명 없고 분해 불완전
+
+【 지도 원칙 】
+- 정답을 직접 알려주지 않는다. 질문으로 사고를 유도한다.
+- "소수가 뭔지 먼저 말해볼 수 있어?" → "그러면 48을 가장 작은 소수로 나누면?" 순서로 진행
+- 학생 답이 틀려도 "틀렸어"라고 하지 않고 다시 생각할 방향 제시
+- 피드백 요청 시: A~E 중 현재 등급과 한 단계 위로 올리기 위한 Next Action 제시
+- 중학생 수준의 친근한 언어 사용, 한국어로만 답변`
+    }]
+  }
+};
+
+// ── MIDDLE SCHOOL UNIT SELECT ──
+function selectMiddleUnit(unitId, btn) {
+  document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const u = M_UNITS[unitId];
+  document.getElementById('welcome-msg') && (document.getElementById('welcome-msg').style.display = 'none');
+
+  const rubricBox = document.getElementById('rubric-content');
+  rubricBox.innerHTML = `<table>${u.rubric5.map(r=>`<tr><td><span class="lv ${r.lv}">${r.grade}</span></td><td style="font-size:11px;color:var(--text2);line-height:1.5">${r.summary}</td></tr>`).join('')}</table>`;
+  document.getElementById('sidebar-rubric').style.display = 'block';
+
+  const key = unitId + '_a1';
+  if (!S.history[key]) { S.history[key] = []; S.step[key] = 1; }
+  const a = u.acts[0];
+  const main = document.getElementById('main-area');
+
+  main.innerHTML = `
+    <div class="problem-card">
+      <div class="problem-header">
+        <span class="act-tag ${a.tag}">${a.tagText}</span>
+        <span class="problem-title">${a.title}</span>
+      </div>
+      <div class="problem-body">${a.body}</div>
+    </div>
+
+    <div class="phase-tabs">
+      <div class="phase-tab active" id="ptab_1_${key}" onclick="switchPhase(1,'${key}')">
+        <div class="phase-num">1</div>AI 탐구 대화
+      </div>
+      <div class="phase-tab" id="ptab_2_${key}" onclick="switchPhase(2,'${key}')">
+        <div class="phase-num">2</div>답안 작성
+      </div>
+      <div class="phase-tab" id="ptab_3_${key}" onclick="switchPhase(3,'${key}')">
+        <div class="phase-num">3</div>루브릭 피드백
+      </div>
+    </div>
+
+    <!-- PHASE 1 -->
+    <div class="phase-panel on" id="pp1_${key}">
+      <div class="chat-card">
+        <div class="chat-header">
+          <div class="chat-dot"></div>
+          <div class="chat-hdr-txt">AI 튜터와 함께 생각을 펼쳐보세요 — 정답은 알려주지 않아요</div>
+        </div>
+        <div class="chat-body" id="chat_${key}">
+          <div class="bbl ai">
+            <div class="bbl-lbl">AI 튜터</div>
+            안녕하세요! 오늘은 <b>소인수분해</b> 수행평가를 함께 준비해볼게요 😊<br><br>
+            먼저 한 가지만 물어볼게요. <b>소수(prime number)</b>가 뭔지 자기 말로 설명해줄 수 있어요?
+          </div>
+        </div>
+        <div class="input-area">
+          <div class="input-row">
+            <textarea id="inp_${key}" placeholder="💬 데모: 아래 버튼을 순서대로 눌러보세요 → 전송 버튼 클릭!" onkeydown="hk(event,'${key}')"></textarea>
+            <button class="mic-btn" id="mic_${key}" onclick="toggleMic('${key}')" title="음성으로 말하기">🎤</button>
+            <button class="send-btn" id="snd_${key}" onclick="sendMiddleMsg('${key}','${unitId}','a1')">전송 ›</button>
+          </div>
+          <div class="voice-status" id="vst_${key}"></div>
+          <div class="pills">
+            <button class="pill" style="background:var(--accent-l);color:var(--accent);border-color:var(--accent-b);font-weight:600" onclick="demoFill('${key}',0)">① 소수가 뭔가요?</button>
+            <button class="pill" onclick="demoFill('${key}',1)">② 2로 나눠요</button>
+            <button class="pill" onclick="demoFill('${key}',2)">③ 24도 2로 나눠요</button>
+            <button class="pill" onclick="demoFill('${key}',3)">④ 끝까지 나눴어요</button>
+            <button class="pill" onclick="demoFill('${key}',4)">⑤ 2⁴×3 이요!</button>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <button onclick="switchPhase(2,'${key}')" style="padding:9px 20px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">탐구 완료 → 답안 작성하기 ›</button>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-panel" id="pp2_${key}">
+      <div class="editor-card">
+        <div class="editor-header">
+          <div class="editor-header-left">
+            <div class="editor-title">✏️ 내 답안 작성</div>
+            <div class="editor-hint">AI 없이 혼자 써보는 구간 — 실제 수행평가와 동일한 조건</div>
+          </div>
+          <button class="hint-toggle" onclick="toggleConceptHint('${key}')">💡 개념 힌트</button>
+        </div>
+        <div id="concept-hint_${key}" style="display:none;padding:12px 18px;background:var(--amber-l);border-bottom:1px solid var(--amber-b);font-size:13px;color:#78350F;line-height:1.7">
+          <b>개념만 확인하세요 (문장을 써드리지는 않아요)</b><br>
+          · 소수: 1과 자기 자신만을 약수로 가지는 수 (2, 3, 5, 7, 11...)<br>
+          · 소인수분해: 1보다 큰 자연수를 소수들의 곱으로 나타내는 것<br>
+          · 분해 시작: 가장 작은 소수(2)부터 나누기 시작
+        </div>
+        <div class="editor-body">
+          <textarea class="answer-textarea" id="ans_${key}"
+            placeholder="소인수분해의 뜻을 설명하고, 48을 소인수분해 하는 과정을 단계별로 서술해보세요.
+
+예시 구조:
+1. 소인수분해란 무엇인가
+2. 48을 분해하는 과정 (단계별로)
+3. 소인수분해의 유용성"
+            oninput="updateCharCount('${key}')"></textarea>
+        </div>
+        <div class="editor-footer">
+          <div class="char-count" id="cc_${key}">0자 작성 중</div>
+          <button class="submit-btn" onclick="submitAnswer('${key}','${unitId}')">제출하고 피드백 받기 →</button>
+        </div>
+      </div>
+      <div style="text-align:left;margin-top:-6px">
+        <button onclick="switchPhase(1,'${key}')" style="padding:7px 14px;background:transparent;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:12px;color:var(--text2);font-family:inherit;cursor:pointer">← AI 탐구로 돌아가기</button>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase-panel" id="pp3_${key}">
+      <div class="feedback-card" id="fb-card_${key}">
+        <div style="padding:40px;text-align:center;color:var(--text3);font-size:14px">
+          📝 답안을 먼저 작성하고 제출하면 피드백이 나타납니다.
+        </div>
+      </div>
+    </div>`;
+}
+
+function switchPhase(n, key) {
+  [1,2,3].forEach(i => {
+    const tab = document.getElementById('ptab_' + i + '_' + key);
+    const panel = document.getElementById('pp' + i + '_' + key);
+    if (tab) tab.classList.toggle('active', i === n);
+    if (panel) panel.classList.toggle('on', i === n);
+  });
+}
+
+function toggleConceptHint(key) {
+  const el = document.getElementById('concept-hint_' + key);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateCharCount(key) {
+  const ta = document.getElementById('ans_' + key);
+  const cc = document.getElementById('cc_' + key);
+  if (ta && cc) cc.textContent = ta.value.length + '자 작성 중';
+}
+
+function submitAnswer(key, uid) {
+  const ta = document.getElementById('ans_' + key);
+  const ans = ta ? ta.value.trim() : '';
+  if (!ans) { alert('답안을 먼저 작성해주세요.'); return; }
+  switchPhase(3, key);
+
+  const u = M_UNITS[uid];
+  const fb = u.fbTemplate;
+  const rubric = u.rubric5;
+  const cur = rubric.find(r => r.grade === fb.grade);
+  const targetIdx = rubric.findIndex(r => r.grade === fb.grade) - 1;
+  const target = targetIdx >= 0 ? rubric[targetIdx] : null;
+
+  const fbCard = document.getElementById('fb-card_' + key);
+  fbCard.innerHTML = `
+    <div class="feedback-header">
+      <div class="grade-badge ${cur.cls}">${cur.grade}</div>
+      <div class="grade-info">
+        <h4>현재 답안은 <b>${cur.grade} 수준</b>이에요</h4>
+        <p>${cur.summary}</p>
+      </div>
+    </div>
+    <div class="my-answer-preview">
+      <div class="my-answer-label">내가 쓴 답안</div>
+      <div class="my-answer-text">${ans.replace(/\n/g,'<br>')}</div>
+    </div>
+    <div class="fb-sections">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">3영역 상세 피드백</div>
+      ${fb.areas.map(area => `
+      <div class="fb-section">
+        <div class="fb-section-header">
+          <span class="fb-section-icon">${area.icon}</span>
+          <span class="fb-section-title">${area.title}</span>
+          <span class="fb-section-score ${area.scoreCls}">${area.score}</span>
+        </div>
+        <div class="fb-section-body">
+          ${area.text}
+          <div class="fb-next">${area.next}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="example-section">
+      <div class="example-title">등급별 예시 답안 — 내가 놓친 것이 무엇인지 확인하세요</div>
+      <div class="grade-ladder">
+        ${rubric.map(r => {
+          const isCur = r.grade === fb.grade;
+          const isTarget = target && r.grade === target.grade;
+          return `<div class="grade-row ${isCur?'current':''} ${isTarget?'target':''} ${isCur||isTarget?'open':''}" onclick="toggleGradeRow(this)">
+            <div class="grade-row-header">
+              <div class="grade-lbl ${r.cls}">${r.grade}</div>
+              <div class="grade-row-title">${r.summary}</div>
+              ${isCur?'<span class="grade-row-badge badge-current">내 수준</span>':''}
+              ${isTarget?'<span class="grade-row-badge badge-target">목표</span>':''}
+            </div>
+            <div class="grade-row-body">
+              ${r.answer.replace(/\n/g,'<br>')}
+              ${r.missing ? `<div class="grade-row-missing">${r.missing}</div>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="rewrite-bar">
+      <button class="rewrite-btn" onclick="switchPhase(2,'${key}')">✏️ 피드백 반영해서 다시 쓰기</button>
+      <button class="compare-btn" onclick="switchPhase(1,'${key}')">← AI 탐구로 돌아가기</button>
+    </div>`;
+
+  const tab3 = document.getElementById('ptab_3_' + key);
+  if (tab3) tab3.classList.add('done');
+}
+
+function toggleGradeRow(el) { el.classList.toggle('open'); }
+
+function demoFill(key, idx) {
+  const msgs = [
+    '소수는 1과 자기 자신으로만 나눠지는 수 아닌가요?',
+    '2요.',
+    '24가 되고, 24도 2로 나눌 수 있어요.',
+    '24÷2=12, 12÷2=6, 6÷2=3인데 3은 소수니까 여기서 끝이에요.',
+    '2⁴×3 이요!'
+  ];
+  const ta = document.getElementById('inp_' + key);
+  if (ta) { ta.value = msgs[idx] || ''; ta.focus(); }
+}
+
+const M_QUICK = {
+  prime: '소수가 정확히 무엇인지 설명해주세요.',
+  start: '소인수분해를 어디서부터 시작해야 하나요?',
+  process: '48을 분해하는 과정을 어떻게 서술해야 하나요?',
+  check: '제 답을 확인해주세요. 피드백 부탁해요.'
+};
+function quickMiddleMsg(key, uid, aid, idx) {
+  const a = M_UNITS[uid].acts.find(x => x.id === aid);
+  sendMiddleToAI(key, uid, aid, M_QUICK[a.pillKeys[idx]] || '질문이 있어요.');
+}
+function sendMiddleMsg(key, uid, aid) {
+  const ta = document.getElementById('inp_' + key);
+  const val = ta.value.trim();
+  if (!val || S.loading) return;
+  ta.value = '';
+  sendMiddleToAI(key, uid, aid, val);
+}
+async function sendMiddleToAI(key, uid, aid, userMsg) {
+  if (S.loading) return;
+  if (!S.apiKey) { addBubble(key, 'ai', '⚠️ 상단 배너에 <b>API 키</b>를 먼저 입력해주세요!'); return; }
+  S.loading = true;
+  const snd = document.getElementById('snd_' + key);
+  if (snd) snd.disabled = true;
+  const a = M_UNITS[uid].acts.find(x => x.id === aid);
+  S.history[key].push({ role: 'user', content: userMsg });
+  addBubble(key, 'user', userMsg.replace(/\n/g,'<br>'));
+  showTyping(key);
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': S.apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: a.system, messages: S.history[key] })
+    });
+    const data = await res.json();
+    const reply = data.content?.map(c => c.text||'').join('') || '응답을 받지 못했어요.';
+    hideTyping(key);
+    addBubble(key, 'ai', reply.replace(/\n/g,'<br>'));
+    S.history[key].push({ role: 'assistant', content: reply });
+  } catch(e) {
+    hideTyping(key);
+    addBubble(key, 'ai', '연결 오류가 발생했어요.');
+  }
+  S.loading = false;
+  if (snd) snd.disabled = false;
+}
+function selectUnit(unitId, btn) {
+  document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  S.unit = unitId;
+  if (!S.act[unitId]) S.act[unitId] = 'a1';
+  renderUnit(unitId);
+}
+
+function renderUnit(uid) {
+  const u = UNITS[uid];
+  document.getElementById('welcome-msg') && (document.getElementById('welcome-msg').style.display = 'none');
+
+  // Rubric
+  const rubricBox = document.getElementById('rubric-content');
+  rubricBox.innerHTML = `<table>${u.rubric.map((r,i)=>`<tr><td><span class="lv lv-${['a','b','c','d'][i]}">${r[0]}</span></td><td>${r[1]}</td></tr>`).join('')}</table>`;
+  document.getElementById('sidebar-rubric').style.display = 'block';
+
+  // Main
+  const main = document.getElementById('main-area');
+
+  // Activity tabs
+  const actTabsHtml = u.acts.map(a =>
+    `<div class="act-tab ${S.act[uid]===a.id?'active':''}" onclick="switchAct('${uid}','${a.id}',this)">
+      ${a.label}<div class="tab-sub">${a.sublabel}</div>
+    </div>`
+  ).join('');
+
+  // Build all act sections
+  const sectionsHtml = u.acts.map(a => {
+    const key = uid + '_' + a.id;
+    const stepCount = a.steps.length;
+    const curStep = S.step[key] || 1;
+    const stepsHtml = a.steps.map((s,i) => {
+      const n = i+1;
+      const cls = n < curStep ? 'done' : n === curStep ? 'cur' : '';
+      const lbl = n < curStep ? '✓' : n;
+      return `<div class="step-node"><div class="step-dot ${cls}" id="sd_${key}_${n}">${lbl}</div><span class="step-lbl ${cls==='cur'?'cur':''}" id="sl_${key}_${n}">${s}</span></div>${i<stepCount-1?'<div class="step-line"></div>':''}`;
+    }).join('');
+
+    return `<div id="sec_${key}" class="act-section ${S.act[uid]===a.id?'on':''}">
+      <div class="problem-card">
+        <div class="problem-header">
+          <span class="act-tag ${a.tag}">${a.tagText}</span>
+          <span class="problem-title">${a.title}</span>
+        </div>
+        <div class="problem-body">${a.body}</div>
+        <div class="problem-meta">${a.meta}</div>
+      </div>
+      <div class="steps-row">${stepsHtml}</div>
+      <div class="chat-card">
+        <div class="chat-header"><div class="chat-dot"></div><div class="chat-hdr-txt">AI 선생님과 함께 연습하기</div></div>
+        <div class="chat-body" id="chat_${key}"></div>
+        <div class="input-area">
+          <div class="input-row">
+            <textarea id="inp_${key}" placeholder="${a.placeholder}" onkeydown="hk(event,'${key}')"></textarea>
+            <button class="mic-btn" id="mic_${key}" onclick="toggleMic('${key}')" title="음성으로 말하기">🎤</button>
+            <button class="send-btn" id="snd_${key}" onclick="sendMsg('${key}','${uid}','${a.id}')">전송 ›</button>
+          </div>
+          <div class="voice-status" id="vst_${key}"></div>
+          <div class="pills">${a.pills.map((p,i)=>`<button class="pill" onclick="quickMsg('${key}','${uid}','${a.id}',${i})">${p}</button>`).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  main.innerHTML = `<div class="act-tabs">${actTabsHtml}</div>${sectionsHtml}`;
+
+  // Init chats
+  u.acts.forEach(a => {
+    const key = uid + '_' + a.id;
+    if (!S.history[key]) {
+      S.history[key] = [];
+      S.step[key] = 1;
+      initChat(key, uid, a.id);
+    }
+  });
+}
+
+function switchAct(uid, actId, el) {
+  S.act[uid] = actId;
+  document.querySelectorAll('.act-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.act-section').forEach(s => s.classList.remove('on'));
+  document.getElementById('sec_' + uid + '_' + actId).classList.add('on');
+}
+
+// ── GREETINGS ──
+const GREETS = {
+  'm5-1_a1': '안녕하세요! 활동 1을 시작해볼게요 😊<br><br>배수가 무엇인지, 구체적인 상황이나 곱셈식을 이용해서 설명해보세요.<br>예를 들어 <b>3의 배수</b>는 어떻게 찾을 수 있을까요?',
+  'm5-1_a2': '활동 2예요! 이번엔 공배수와 최소공배수의 관계를 탐구해봐요 😊<br><br>먼저 <b>2와 3의 배수</b>를 각각 나열해보고, 공통된 배수를 찾아보세요!',
+  'm5-2_a1': '안녕하세요! 활동 1을 시작해볼게요 😊<br><br>일이 일어날 가능성을 <b>수</b>(0, 1/2, 1)나 <b>말</b>(확실하다, 반반이다, 불가능하다 등)로 표현해보세요.<br>동전을 던졌을 때 앞면이 나올 가능성은 얼마일까요?',
+  'm5-2_a2': '활동 2예요! 돌림판으로 가능성을 판단해봐요 😊<br><br>가 돌림판과 나 돌림판에서 숫자 1이 나올 가능성을 각각 계산해보세요.<br>어떤 돌림판을 선택하는 게 유리할까요?',
+  'm6-1_a1': '안녕하세요! 활동 1을 시작해볼게요 😊<br><br>각기둥의 전개도가 되기 위한 조건은 무엇인지 떠올려보세요.<br>전개도를 접었을 때 각기둥이 되려면 어떤 조건이 필요할까요?',
+  'm6-1_a2': '활동 2예요! 이번엔 실제로 포장 용기를 설계해봐요 😊<br><br>담고 싶은 물건을 먼저 정하고, 그 물건의 크기와 모양을 떠올려보세요.<br>어떤 각기둥이 가장 잘 맞을까요?',
+  'm6-2_a1': '안녕하세요! 활동 1을 시작해볼게요 😊<br><br>비례식을 세워서 환전 금액을 구해보세요.<br>형태: <code style="background:var(--accent-l);color:var(--accent);padding:2px 7px;border-radius:4px;font-size:12px">1 : 1200 = □ : 140000</code><br><br>비례식의 성질(외항의 곱 = 내항의 곱)을 이용해 □를 구한 뒤, 6:4로 비례배분도 해보세요!',
+  'm6-2_a2': '활동 2예요! 환율이 바뀌면 어떻게 될지 예측해봐요 😊<br><br>환율이 1,400원으로 올랐을 때 새 비례식을 세우고,<br>활동 1과 비교해서 달러가 얼마나 줄었는지 분석해보세요.',
+  'm6-2_a3': '활동 3이에요! 이번엔 줄어든 예산으로 전략을 수정해봐요 😊<br><br>100달러로 여행하기 위해 숙박비:식비 비율을 직접 정해보세요.<br>왜 그 비율이 좋은지 근거도 함께 설명해주세요!'
+};
+
+function initChat(key, uid, aid) {
+  const greet = GREETS[uid + '_' + aid] || 'AI 선생님과 함께 연습을 시작해요! 문제를 읽고 답을 써보세요 😊';
+  addBubble(key, 'ai', greet);
+}
+
+// ── QUICK MESSAGES ──
+const QUICK_BANK = {
+  hint: '힌트를 주세요. 어떻게 시작하면 좋을까요?',
+  def: '배수의 뜻이 정확히 무엇인가요?',
+  mult: '곱셈식을 이용해서 배수를 어떻게 설명하나요?',
+  check: '제 답을 확인해주세요. 맞게 했나요?',
+  peer: '제 풀이나 설명에 대해 동료 평가를 해주세요. 잘한 점과 보완할 점을 알려주세요.',
+  lcm_def: '공배수가 무엇인지 설명해주세요.',
+  lcm_how: '최소공배수를 구하는 방법을 알려주세요.',
+  rel: '공배수와 최소공배수의 관계를 설명해주세요.',
+  num: '가능성을 수로 어떻게 나타내나요? 0, 1/2, 1이 각각 어떤 의미인가요?',
+  word: '가능성을 말로 어떻게 표현하나요?',
+  calc: '돌림판에서 가능성을 어떻게 계산하나요?',
+  analyze: '두 돌림판을 비교 분석해주세요.',
+  cond: '각기둥 전개도가 되기 위한 조건이 뭔가요?',
+  fold: '전개도를 접었을 때 각기둥이 맞는지 어떻게 확인하나요?',
+  example: '전개도 예시를 설명해주세요.',
+  base: '각기둥의 밑면을 어떻게 선택하나요?',
+  order: '전개도를 그리는 순서를 알려주세요.',
+  form: '비례식 형태가 어떻게 되나요? 예시를 보여주세요.',
+  prop: '비례식의 성질(외항의 곱 = 내항의 곱)이 무엇인지 설명해주세요.',
+  dist: '비례배분 방법을 알려주세요.',
+  newform: '새 환율로 비례식을 어떻게 세우나요?',
+  explain: '친구에게 환율 변화를 설명하는 연습을 하고 싶어요.',
+  adjust: '숙박비와 식비 비율을 어떻게 조정하면 좋을까요?',
+  verify: '비율을 조정한 후 계산이 맞는지 어떻게 검증하나요?',
+  reflect: '오늘 배운 내용을 정리하고 싶어요.'
+};
+
+function quickMsg(key, uid, aid, pillIdx) {
+  const u = UNITS[uid];
+  const a = u.acts.find(x => x.id === aid);
+  const pillKey = a.pillKeys[pillIdx];
+  const msg = QUICK_BANK[pillKey] || '질문이 있어요.';
+  sendToAI(key, uid, aid, msg);
+}
+
+// ── SEND ──
+function hk(e, key) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); const [uid, aid] = key.split('_'); sendMsg(key, uid, aid); }
+}
+function sendMsg(key, uid, aid) {
+  const ta = document.getElementById('inp_' + key);
+  const val = ta.value.trim();
+  if (!val || S.loading) return;
+  ta.value = '';
+  sendToAI(key, uid, aid, val);
+}
+
+async function sendToAI(key, uid, aid, userMsg) {
+  if (S.loading) return;
+  if (!S.apiKey) {
+    addBubble(key, 'ai', '⚠️ 상단 배너에 <b>API 키</b>를 먼저 입력해주세요!');
+    return;
+  }
+  S.loading = true;
+  const snd = document.getElementById('snd_' + key);
+  if (snd) snd.disabled = true;
+
+  const u = UNITS[uid];
+  const a = u.acts.find(x => x.id === aid);
+  S.history[key].push({ role: 'user', content: userMsg });
+  addBubble(key, 'user', userMsg.replace(/\n/g,'<br>'));
+  showTyping(key);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': S.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: a.system,
+        messages: S.history[key]
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.map(c => c.text||'').join('') || '응답을 받지 못했어요. 다시 시도해주세요.';
+    hideTyping(key);
+    const isPeer = userMsg.includes('동료 평가') || userMsg.includes('동료평가');
+    const isFb = userMsg.includes('확인해') || userMsg.includes('피드백') || userMsg.includes('맞나요') || userMsg.includes('맞게');
+    const bType = isPeer ? 'peer' : isFb ? 'fb' : 'ai';
+    addBubble(key, bType, reply.replace(/\n/g,'<br>'));
+    S.history[key].push({ role: 'assistant', content: reply });
+    // Advance step
+    const newStep = Math.min((S.step[key]||1) + 1, a.steps.length);
+    S.step[key] = newStep;
+    updateSteps(key, newStep, a.steps.length);
+  } catch(e) {
+    hideTyping(key);
+    addBubble(key, 'ai', '연결 오류가 발생했어요. API 키를 확인하거나 잠시 후 다시 시도해주세요.');
+  }
+  S.loading = false;
+  if (snd) snd.disabled = false;
+}
+
+// ── CHAT UI ──
+function addBubble(key, type, html) {
+  const area = document.getElementById('chat_' + key);
+  if (!area) return;
+  const div = document.createElement('div');
+  div.className = 'bbl ' + type;
+  const labels = { ai: 'AI 선생님', fb: '✓ 피드백', peer: '👥 동료 평가' };
+  if (labels[type]) {
+    const ttsId = 'tts_' + Date.now();
+    const plain = html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+    div.innerHTML = `<div class="bbl-lbl">${labels[type]}</div>${html}<br><button class="tts-btn" id="${ttsId}" onclick="speakTTS(this,\`${plain.replace(/`/g,"'")}\`)">🔊 읽어주기</button>`;
+  } else {
+    div.innerHTML = html;
+  }
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function showTyping(key) {
+  const area = document.getElementById('chat_' + key);
+  if (!area) return;
+  const div = document.createElement('div');
+  div.className = 'typing'; div.id = 'tp_' + key;
+  div.innerHTML = '<div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>';
+  area.appendChild(div); area.scrollTop = area.scrollHeight;
+}
+function hideTyping(key) {
+  const el = document.getElementById('tp_' + key);
+  if (el) el.remove();
+}
+
+function updateSteps(key, cur, total) {
+  for (let i = 1; i <= total; i++) {
+    const d = document.getElementById('sd_' + key + '_' + i);
+    const l = document.getElementById('sl_' + key + '_' + i);
+    if (!d) continue;
+    if (i < cur) { d.className = 'step-dot done'; d.textContent = '✓'; if(l) l.className='step-lbl'; }
+    else if (i === cur) { d.className = 'step-dot cur'; d.textContent = i; if(l) l.className='step-lbl cur'; }
+    else { d.className = 'step-dot'; d.textContent = i; if(l) l.className='step-lbl'; }
+  }
+}
+
+// ── VOICE STT ──
+const VS = { recog: null, activeKey: null };
+function toggleMic(key) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById('mic_' + key);
+  const vst = document.getElementById('vst_' + key);
+  if (!SR) { if(vst) vst.textContent = '크롬 브라우저에서 사용해주세요.'; return; }
+
+  if (VS.recog && VS.activeKey === key) { VS.recog.stop(); return; }
+  if (VS.recog) VS.recog.stop();
+
+  const rec = new SR();
+  rec.lang = 'ko-KR'; rec.continuous = false; rec.interimResults = true;
+  VS.recog = rec; VS.activeKey = key;
+
+  rec.onstart = () => { if(micBtn){micBtn.classList.add('rec');micBtn.textContent='⏹';} if(vst) vst.textContent='🔴 듣고 있어요... 말씀하세요'; };
+  rec.onresult = (e) => {
+    let fin='', int='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      e.results[i].isFinal ? fin+=e.results[i][0].transcript : int+=e.results[i][0].transcript;
+    }
+    const ta = document.getElementById('inp_' + key);
+    if(ta) ta.value = fin||int;
+    if(fin && vst) vst.textContent='✓ 인식 완료! 전송 버튼을 누르세요.';
+  };
+  rec.onerror = (e) => {
+    if(vst) vst.textContent = e.error==='not-allowed'?'마이크 권한을 허용해주세요.':'음성 인식 오류';
+    if(micBtn){micBtn.classList.remove('rec');micBtn.textContent='🎤';}
+  };
+  rec.onend = () => { if(micBtn){micBtn.classList.remove('rec');micBtn.textContent='🎤';} VS.recog=null; VS.activeKey=null; };
+  rec.start();
+}
+
+// ── TTS ──
+function speakTTS(btn, text) {
+  if (!window.speechSynthesis) return;
+  if (S.speaking) {
+    window.speechSynthesis.cancel(); S.speaking=false;
+    document.querySelectorAll('.tts-btn').forEach(b=>{b.classList.remove('speaking');b.textContent='🔊 읽어주기';});
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text.replace(/[^\uAC00-\uD7A3\u0020-\u007E\u00A0-\u024F]/g,''));
+  utt.lang='ko-KR'; utt.rate=0.95; utt.pitch=1.05;
+  const voices = window.speechSynthesis.getVoices();
+  const ko = voices.find(v=>v.lang.startsWith('ko'));
+  if(ko) utt.voice=ko;
+  S.speaking=true;
+  btn.classList.add('speaking'); btn.textContent='⏹ 멈추기';
+  utt.onend=utt.onerror=()=>{ S.speaking=false; btn.classList.remove('speaking'); btn.textContent='🔊 읽어주기'; };
+  window.speechSynthesis.speak(utt);
+}
+
+// Load voices
+if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
+
+// ── 데모 대화 스크립트 ──
+const DEMO_SCRIPT = [
+  { user: '소수는 1과 자기 자신으로만 나눠지는 수 아닌가요?',
+    ai: '맞아요! 정확해요 😊 소수는 약수가 딱 2개인 수예요. 1과 자기 자신.\n\n예를 들면 2는 약수가 1과 2뿐이라 소수, 4는 약수가 1, 2, 4로 3개라 소수가 아니에요.\n\n그러면 이제 48을 생각해볼게요. 48을 나눌 수 있는 가장 작은 소수가 뭘까요?' },
+  { user: '2요.',
+    ai: '정확해요! 2로 나누면 얼마가 되나요?\n\n48 ÷ 2 = ?\n\n계산해보고, 그 결과도 또 소수로 나눌 수 있는지 확인해보세요.' },
+  { user: '24가 되고, 24도 2로 나눌 수 있어요.',
+    ai: '완벽해요! 계속 나눠보세요.\n\n48 ÷ 2 = 24\n24 ÷ 2 = ?\n\n이 과정을 더 이상 나눌 수 없을 때까지 반복하면 소인수분해가 완성돼요. 끝까지 해볼 수 있어요?' },
+  { user: '24÷2=12, 12÷2=6, 6÷2=3인데 3은 소수니까 여기서 끝이에요.',
+    ai: '완벽해요! 👏 그러면 48을 소인수들의 곱으로 나타내면 어떻게 되나요?\n\n48 = 2 × 2 × 2 × 2 × 3\n\n이걸 지수로 깔끔하게 표현할 수도 있어요. 어떻게 쓸 수 있을까요?' },
+  { user: '2⁴×3 이요!',
+    ai: '정확해요! 48 = 2⁴ × 3\n\n이제 탐구 대화가 끝났어요. 머릿속에 정리된 내용을 바탕으로 직접 답안을 써보세요 ✏️\n\n<b>→ 상단 "답안 작성" 탭을 눌러서 내 답안을 작성해보세요!</b>' },
+];
+
+let demoStep = 0;
+
+async function sendMiddleToAI(key, uid, aid, userMsg) {
+  if (S.loading) return;
+  S.loading = true;
+  const snd = document.getElementById('snd_' + key);
+  if (snd) snd.disabled = true;
+
+  S.history[key].push({ role: 'user', content: userMsg });
+  addBubble(key, 'user', userMsg.replace(/\n/g,'<br>'));
+  showTyping(key);
+
+  // 데모 모드: 스크립트에서 순서대로 응답
+  await new Promise(r => setTimeout(r, 900));
+  hideTyping(key);
+
+  const script = DEMO_SCRIPT[demoStep] || DEMO_SCRIPT[DEMO_SCRIPT.length - 1];
+  const reply = script.ai;
+  addBubble(key, 'ai', reply.replace(/\n/g,'<br>'));
+  S.history[key].push({ role: 'assistant', content: reply });
+  demoStep = Math.min(demoStep + 1, DEMO_SCRIPT.length - 1);
+
+  // 마지막 단계면 답안 자동 채우기 + 탭 안내
+  if (demoStep === DEMO_SCRIPT.length - 1) {
+    setTimeout(() => {
+      const ta = document.getElementById('ans_' + key);
+      if (ta && !ta.value) {
+        ta.value = '소인수분해는 자연수를 소수들의 곱으로 나타내는 것입니다. 48 = 2×2×2×2×3 입니다.';
+        updateCharCount(key);
+        // 답안 탭으로 자동 전환
+        switchPhase(2, key);
+        // 안내 메시지
+        setTimeout(() => {
+          const hint = document.createElement('div');
+          hint.style.cssText = 'padding:10px 16px;background:var(--accent-l);border:1px solid var(--accent-b);border-radius:8px;font-size:13px;color:var(--accent);margin-top:8px;';
+          hint.innerHTML = '✦ <b>C 수준 예시 답안</b>이 자동으로 입력되었어요. "제출하고 피드백 받기" 버튼을 눌러보세요!';
+          const editorCard = document.querySelector('.editor-card');
+          if (editorCard) editorCard.parentNode.insertBefore(hint, editorCard.nextSibling);
+        }, 300);
+      }
+    }, 600);
+  }
+
+  S.loading = false;
+  if (snd) snd.disabled = false;
+}
+
+
+// ── 초등 단원 데이터 ──
+const E_UNITS = {
+  'e5-1': {
+    title: '약수와 배수', grade: '초등 5학년',
+    area: '수와 연산', method: '서술형, 동료평가',
+    rubric4: [
+      { grade: '매우잘함', cls: 'grade-A', lv: 'lv-a',
+        summary: '배수·공배수·최소공배수를 여러 방법으로 구하고 관계를 논리적으로 설명할 수 있다.',
+        answer: '배수는 어떤 수를 1배, 2배, 3배... 한 수입니다. 예를 들어 3의 배수는 3×1=3, 3×2=6처럼 곱셈식으로 나타낼 수 있습니다.\n\n2와 3의 공배수는 두 수에서 공통으로 나타나는 배수입니다. 2의 배수: 2, 4, 6, 8, 10, 12... / 3의 배수: 3, 6, 9, 12... 에서 공통된 수인 6, 12, 18...이 공배수이고, 가장 작은 6이 최소공배수입니다.\n\n공배수는 항상 최소공배수의 배수이므로, 최소공배수(6)만 알면 모든 공배수를 바로 구할 수 있습니다.',
+        missing: null },
+      { grade: '잘함', cls: 'grade-B', lv: 'lv-b',
+        summary: '배수·공배수·최소공배수를 구하고 관계를 설명할 수 있다.',
+        answer: '배수는 어떤 수를 1배, 2배, 3배... 한 수입니다. 3의 배수는 3, 6, 9, 12...입니다.\n\n2와 3의 배수를 각각 나열하면 공통된 수가 공배수입니다. 2와 3의 공배수는 6, 12, 18...이고, 가장 작은 공배수인 6이 최소공배수입니다.\n\n공배수는 최소공배수의 배수와 같습니다.',
+        missing: '✦ 매우잘함으로 올리려면: 배수를 곱셈식(3×1=3, 3×2=6...)으로 표현하고, 최소공배수가 왜 유용한지 이유를 추가해보세요.' },
+      { grade: '보통', cls: 'grade-C', lv: 'lv-c',
+        summary: '간단한 수의 배수·공배수·최소공배수를 구할 수 있다.',
+        answer: '배수는 어떤 수를 여러 번 더한 수입니다. 3의 배수는 3, 6, 9, 12입니다.\n\n2와 3의 공배수는 6, 12입니다. 최소공배수는 6입니다.',
+        missing: '✦ 잘함으로 올리려면: 2와 3의 배수를 각각 나열해서 공배수를 찾는 과정을 써주세요. 공배수와 최소공배수의 관계도 한 문장으로 설명해보세요.' },
+      { grade: '노력요함', cls: 'grade-D', lv: 'lv-d',
+        summary: '안내된 절차로 간단한 수의 배수를 구할 수 있다.',
+        answer: '3의 배수는 3, 6, 9입니다. 공배수는 6입니다.',
+        missing: '✦ 보통으로 올리려면: 배수가 무엇인지 먼저 설명하고, 2의 배수와 3의 배수를 각각 나열해서 공배수를 찾아보세요.' },
+    ],
+    fbTemplate: {
+      grade: '보통',
+      areas: [
+        { icon: '📘', title: '지식·이해', score: '보통', scoreCls: 'score-mid',
+          text: '배수의 뜻을 썼고 3의 배수도 맞게 나열했어요. 기본 개념은 이해하고 있어요.',
+          next: '"여러 번 더한 수"보다 "1배, 2배... 한 수"로 쓰면 더 정확해요. 곱셈식(3×1=3, 3×2=6)으로도 표현해보세요.' },
+        { icon: '⚙️', title: '과정·기능', score: '미흡', scoreCls: 'score-low',
+          text: '공배수 6, 12는 맞지만 어떻게 찾았는지 과정이 없어요. 두 수의 배수를 각각 나열해서 비교하는 과정이 필요해요.',
+          next: '→ 다음 행동: 2의 배수: 2, 4, 6, 8, 10, 12... / 3의 배수: 3, 6, 9, 12... 처럼 나열하고 공통된 수를 찾는 과정을 써보세요.' },
+        { icon: '💡', title: '가치·태도', score: '미흡', scoreCls: 'score-low',
+          text: '공배수와 최소공배수의 관계, 또는 왜 최소공배수가 중요한지에 대한 내용이 없어요.',
+          next: '→ 다음 행동: "공배수는 최소공배수의 배수와 같다"는 관계를 한 문장으로 추가해보세요.' },
+      ]
+    },
+    demoScript: [
+      { user: '배수는 어떤 수를 여러 번 더한 수 아닌가요?',
+        ai: '좋은 출발이에요! 맞아요, 배수는 반복해서 더한 수이기도 하죠. 수학에서는 곱셈식으로 표현하는 게 더 정확해요 😊<br><br><b>배수 = 어떤 수를 1배, 2배, 3배... 한 수</b><br>3의 배수: 3×1=3, 3×2=6, 3×3=9...<br><br>그러면 2와 3의 배수를 각각 나열해볼 수 있어요?' },
+      { user: '2의 배수는 2,4,6,8,10,12이고 3의 배수는 3,6,9,12예요.',
+        ai: '완벽해요! 👏 두 줄에서 공통으로 나타나는 수가 보이나요?<br><br>2의 배수: 2, 4, <b>6</b>, 8, 10, <b>12</b>...<br>3의 배수: 3, <b>6</b>, 9, <b>12</b>...<br><br>공통된 수들이 바로 <b>공배수</b>예요. 이 중에서 가장 작은 수는 뭔가요?' },
+      { user: '6이에요! 그게 최소공배수인 거죠?',
+        ai: '정확해요! 6이 2와 3의 최소공배수예요 😊<br><br>그러면 공배수(6, 12, 18...)와 최소공배수(6)는 어떤 관계일까요? 규칙이 보이나요?' },
+      { user: '공배수가 최소공배수의 배수예요!',
+        ai: '완벽해요! 🎉<br><br><b>공배수 = 최소공배수의 배수</b><br><br>이 관계를 알면 최소공배수만 구해도 모든 공배수를 알 수 있어요. 이제 탐구한 내용을 바탕으로 직접 답안을 써볼게요!<br><b>→ "답안 작성" 탭을 눌러보세요!</b>' },
+    ],
+    demoFillMsgs: [
+      '배수는 어떤 수를 여러 번 더한 수 아닌가요?',
+      '2의 배수는 2,4,6,8,10,12이고 3의 배수는 3,6,9,12예요.',
+      '6이에요! 그게 최소공배수인 거죠?',
+      '공배수가 최소공배수의 배수예요!',
+    ],
+    demoAnswer: '배수는 어떤 수를 여러 번 더한 수입니다. 3의 배수는 3, 6, 9, 12입니다.\n\n2와 3의 공배수는 6, 12입니다. 최소공배수는 6입니다.',
+    answerPlaceholder: '배수의 의미를 설명하고, 2와 3의 공배수와 최소공배수를 구하는 과정을 써보세요.',
+    conceptHint: '· 배수: 어떤 수를 1배, 2배, 3배... 한 수 (3×1=3, 3×2=6...)\n· 공배수: 두 수의 공통된 배수\n· 최소공배수: 공배수 중 가장 작은 수',
+  },
+  'e6-1': {
+    title: '각기둥과 각뿔', grade: '초등 6학년',
+    area: '도형과 측정', method: '논술형',
+    rubric4: [
+      { grade: '매우잘함', cls: 'grade-A', lv: 'lv-a',
+        summary: '전개도 가능·불가능을 논리적으로 설명하고 조건에 맞게 여러 모양으로 그릴 수 있다.',
+        answer: '각기둥의 전개도가 되기 위한 조건은 세 가지입니다.\n첫째, 두 밑면이 서로 합동인 다각형이어야 합니다. 둘째, 옆면이 모두 직사각형이어야 합니다. 셋째, 접었을 때 겹치는 면이 없고 틈이 생기지 않아야 합니다.\n\n전개도가 되지 않는 경우는 옆면의 가로 길이가 밑면의 변의 길이와 다르거나 접었을 때 틈이 생기는 경우입니다. 예를 들어 삼각기둥의 경우 옆면 3개가 밑면 삼각형의 세 변에 각각 연결되어야 하는데 크기가 맞지 않으면 전개도가 될 수 없습니다.\n\n전개도를 그릴 때는 항상 접었을 때의 모양을 상상하면서 각 면의 크기와 위치를 정확히 결정해야 합니다.',
+        missing: null },
+      { grade: '잘함', cls: 'grade-B', lv: 'lv-b',
+        summary: '전개도 가능·불가능을 구별하고 전개도를 그릴 수 있다.',
+        answer: '각기둥의 전개도 조건은 두 밑면이 합동인 다각형이고, 옆면이 모두 직사각형이어야 합니다. 접었을 때 겹치거나 틈이 없어야 합니다.\n\n전개도가 안 되는 경우는 옆면 크기가 밑면 변의 길이와 맞지 않거나 밑면 위치가 틀린 경우입니다.\n\n전개도를 그릴 때는 접었을 때를 상상하면서 그려야 합니다.',
+        missing: '✦ 매우잘함으로 올리려면: 삼각기둥 등 구체적인 예시를 들어 설명하고, 전개도가 되지 않는 경우를 더 구체적으로 서술해보세요.' },
+      { grade: '보통', cls: 'grade-C', lv: 'lv-c',
+        summary: '전개도 가능·불가능을 구별하고 일부가 주어진 전개도를 완성할 수 있다.',
+        answer: '각기둥의 전개도 조건은 밑면 두 개와 옆면들이 있어야 합니다. 접었을 때 각기둥이 되어야 합니다.\n\n전개도가 안 되는 것은 면들이 맞지 않는 경우입니다.',
+        missing: '✦ 잘함으로 올리려면: 밑면이 "합동인 다각형", 옆면이 "직사각형"이어야 한다는 정확한 수학 용어로 조건을 써보세요.' },
+      { grade: '노력요함', cls: 'grade-D', lv: 'lv-d',
+        summary: '조작 활동을 통해 가능·불가능을 구별하고 안내에 따라 완성할 수 있다.',
+        answer: '접었을 때 각기둥이 되면 전개도입니다.',
+        missing: '✦ 보통으로 올리려면: 전개도가 되기 위한 조건을 구체적으로 써보세요. 밑면과 옆면이 어떤 모양이어야 하는지부터 시작해보세요.' },
+    ],
+    fbTemplate: {
+      grade: '보통',
+      areas: [
+        { icon: '📘', title: '지식·이해', score: '보통', scoreCls: 'score-mid',
+          text: '"밑면 두 개와 옆면들이 있어야 한다"는 기본 구성은 알고 있어요. 그러나 "합동인 다각형"과 "직사각형"이라는 정확한 수학 용어가 빠져 있어요.',
+          next: '밑면은 "합동인 다각형", 옆면은 "직사각형"이라는 조건을 정확히 써보세요.' },
+        { icon: '⚙️', title: '과정·기능', score: '미흡', scoreCls: 'score-low',
+          text: '"면들이 맞지 않는 경우"는 너무 막연해요. 어떤 면이 어떻게 맞지 않는지 구체적으로 설명이 필요해요.',
+          next: '→ 다음 행동: "옆면의 가로 길이가 밑면의 변의 길이와 다를 때" 또는 "접었을 때 틈이 생길 때"처럼 구체적으로 써보세요.' },
+        { icon: '💡', title: '가치·태도', score: '미흡', scoreCls: 'score-low',
+          text: '전개도를 그릴 때 어떤 점을 생각해야 하는지 자신의 생각이 없어요.',
+          next: '→ 다음 행동: "접었을 때의 모양을 상상하면서 그려야 한다"처럼 핵심 전략을 한 문장 추가해보세요.' },
+      ]
+    },
+    demoScript: [
+      { user: '전개도는 입체도형을 펼친 것 아닌가요?',
+        ai: '맞아요! 각기둥을 펼쳐서 평면으로 만든 게 전개도예요 😊<br><br>그러면 각기둥은 어떤 면들로 이루어져 있을까요? 삼각기둥을 예로 생각해보세요.' },
+      { user: '위아래 삼각형 면이랑 옆에 직사각형 면들이요.',
+        ai: '완벽해요! 👏 위아래 삼각형이 <b>밑면</b> 2개, 옆의 직사각형이 <b>옆면</b> 3개예요.<br><br>전개도가 되려면 이 면들의 크기가 어떻게 맞아야 할까요? 접었을 때 각기둥이 되려면요?' },
+      { user: '옆면의 가로가 밑면의 변 길이랑 같아야 할 것 같아요.',
+        ai: '정확해요! 그게 핵심 조건이에요 😊<br><br>그러면 전개도가 <b>안 되는</b> 경우는 어떤 경우일까요? 잘못 그리면 접었을 때 어떻게 될까요?' },
+      { user: '틈이 생기거나 겹치는 부분이 생겨요.',
+        ai: '완벽해요! 🎉 조건 정리:<br><br>① 두 밑면: <b>합동인 다각형</b><br>② 옆면: <b>모두 직사각형</b><br>③ 접었을 때: <b>겹침·틈 없음</b><br><br>이제 직접 답안을 써볼게요!<br><b>→ "답안 작성" 탭을 눌러보세요!</b>' },
+    ],
+    demoFillMsgs: [
+      '전개도는 입체도형을 펼친 것 아닌가요?',
+      '위아래 삼각형 면이랑 옆에 직사각형 면들이요.',
+      '옆면의 가로가 밑면의 변 길이랑 같아야 할 것 같아요.',
+      '틈이 생기거나 겹치는 부분이 생겨요.',
+    ],
+    demoAnswer: '각기둥의 전개도 조건은 밑면 두 개와 옆면들이 있어야 합니다. 접었을 때 각기둥이 되어야 합니다.\n\n전개도가 안 되는 것은 면들이 맞지 않는 경우입니다.',
+    answerPlaceholder: '각기둥의 전개도가 되기 위한 조건을 설명하고, 되지 않는 경우도 써보세요.',
+    conceptHint: '· 각기둥 구성: 밑면(합동인 다각형) 2개 + 옆면(직사각형) 여러 개\n· 전개도 조건: 접었을 때 겹치거나 틈이 없어야 함\n· 확인 방법: 옆면의 가로 = 밑면의 변 길이',
+  }
+};
+
+let elemDemoSteps = {};
+
+function selectElemUnit(unitId, btn) {
+  document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const u = E_UNITS[unitId];
+  document.getElementById('welcome-msg') && (document.getElementById('welcome-msg').style.display = 'none');
+  const rubricBox = document.getElementById('rubric-content');
+  rubricBox.innerHTML = '<table>' + u.rubric4.map(r=>'<tr><td><span class="lv ' + r.lv + '" style="font-size:9px;white-space:nowrap;padding:2px 5px">' + r.grade + '</span></td><td style="font-size:11px;color:var(--text2);line-height:1.5">' + r.summary + '</td></tr>').join('') + '</table>';
+  document.getElementById('sidebar-rubric').style.display = 'block';
+  const key = unitId + '_a1';
+  if (!S.history[key]) S.history[key] = [];
+  if (elemDemoSteps[key] === undefined) elemDemoSteps[key] = 0;
+  const pillsHtml = u.demoFillMsgs.map((m,i) =>
+    '<button class="pill" style="' + (i===0?'background:var(--accent-l);color:var(--accent);border-color:var(--accent-b);font-weight:600':'') + '" onclick="elemDemoFill(\'' + key + '\',' + i + ')">' +
+    ['①','②','③','④'][i] + ' ' + (m.length>12?m.slice(0,12)+'...':m) + '</button>').join('');
+  const main = document.getElementById('main-area');
+  main.innerHTML = '<div class="problem-card"><div class="problem-header"><span class="act-tag tag-blue">' + u.grade + ' · ' + u.method + '</span><span class="problem-title">' + u.title + ' — 수행평가 서술형</span></div><div class="problem-body"><b>[문항]</b> ' + u.answerPlaceholder + '<br><br><span style="font-size:12px;color:var(--text3)">평가 영역: ' + u.area + ' · 성취수준: 매우잘함 / 잘함 / 보통 / 노력요함</span></div></div>' +
+    '<div class="phase-tabs"><div class="phase-tab active" id="ptab_1_' + key + '" onclick="switchPhase(1,\'' + key + '\')"><div class="phase-num">1</div>AI 탐구 대화</div><div class="phase-tab" id="ptab_2_' + key + '" onclick="switchPhase(2,\'' + key + '\')"><div class="phase-num">2</div>답안 작성</div><div class="phase-tab" id="ptab_3_' + key + '" onclick="switchPhase(3,\'' + key + '\')"><div class="phase-num">3</div>성취수준 피드백</div></div>' +
+    '<div class="phase-panel on" id="pp1_' + key + '"><div class="chat-card"><div class="chat-header"><div class="chat-dot"></div><div class="chat-hdr-txt">AI 선생님과 함께 생각을 펼쳐보세요</div></div><div class="chat-body" id="chat_' + key + '"><div class="bbl ai"><div class="bbl-lbl">AI 선생님</div>안녕하세요! 오늘은 <b>' + u.title + '</b> 수행평가를 함께 준비해볼게요 😊<br><br>' + (unitId==='e5-1'?'먼저 <b>배수</b>가 뭔지 자기 말로 설명해줄 수 있어요?':'먼저 <b>전개도</b>가 무엇인지 자기 말로 설명해줄 수 있어요?') + '</div></div><div class="input-area"><div class="input-row"><textarea id="inp_' + key + '" placeholder="💬 데모: 아래 버튼을 순서대로 눌러보세요 → 전송 클릭!"></textarea><button class="mic-btn">🎤</button><button class="send-btn" id="snd_' + key + '" onclick="elemSendMsg(\'' + key + '\',\'' + unitId + '\')">전송 ›</button></div><div class="pills">' + pillsHtml + '</div></div></div><div style="text-align:right;margin-top:8px"><button onclick="switchPhase(2,\'' + key + '\')" style="padding:9px 20px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">탐구 완료 → 답안 작성하기 ›</button></div></div>' +
+    '<div class="phase-panel" id="pp2_' + key + '"><div style="padding:10px 16px;background:var(--accent-l);border:1px solid var(--accent-b);border-radius:8px;font-size:13px;color:var(--accent);margin-bottom:8px">✦ <b>보통 수준</b> 예시 답안이 입력되어 있어요. "제출하고 피드백 받기" 버튼을 눌러보세요!</div><div class="editor-card"><div class="editor-header"><div class="editor-header-left"><div class="editor-title">✏️ 내 답안 작성</div><div class="editor-hint">AI 없이 혼자 써보는 구간</div></div><button class="hint-toggle" onclick="toggleConceptHint(\'' + key + '\')">💡 개념 힌트</button></div><div id="concept-hint_' + key + '" style="display:none;padding:12px 18px;background:var(--amber-l);border-bottom:1px solid var(--amber-b);font-size:13px;color:#78350F;line-height:1.9"><b>개념만 확인하세요</b><br>' + u.conceptHint.replace(/\n/g,'<br>') + '</div><textarea class="answer-textarea" id="ans_' + key + '" oninput="updateCharCount(\'' + key + '\')">' + u.demoAnswer + '</textarea><div class="editor-footer"><div class="char-count" id="cc_' + key + '">' + u.demoAnswer.length + '자 작성 중</div><button class="submit-btn" onclick="submitElemAnswer(\'' + key + '\',\'' + unitId + '\')">제출하고 피드백 받기 →</button></div></div></div>' +
+    '<div class="phase-panel" id="pp3_' + key + '"><div class="feedback-card" id="fb-card_' + key + '"><div style="padding:40px;text-align:center;color:var(--text3);font-size:14px">📝 답안을 제출하면 피드백이 나타납니다.</div></div></div>';
+}
+
+function elemDemoFill(key, idx) {
+  const uid = key.replace('_a1','');
+  const u = E_UNITS[uid];
+  if (!u) return;
+  const ta = document.getElementById('inp_' + key);
+  if (ta) { ta.value = u.demoFillMsgs[idx] || ''; ta.focus(); }
+}
+
+async function elemSendMsg(key, uid) {
+  const ta = document.getElementById('inp_' + key);
+  const val = ta ? ta.value.trim() : '';
+  if (!val || S.loading) return;
+  if (ta) ta.value = '';
+  S.loading = true;
+  const snd = document.getElementById('snd_' + key);
+  if (snd) snd.disabled = true;
+  const u = E_UNITS[uid];
+  S.history[key].push({ role: 'user', content: val });
+  addBubble(key, 'user', val.replace(/\n/g,'<br>'));
+  showTyping(key);
+  await new Promise(r => setTimeout(r, 800));
+  hideTyping(key);
+  const step = elemDemoSteps[key] || 0;
+  const script = u.demoScript[Math.min(step, u.demoScript.length-1)];
+  addBubble(key, 'ai', script.ai);
+  S.history[key].push({ role: 'assistant', content: script.ai });
+  elemDemoSteps[key] = Math.min(step + 1, u.demoScript.length - 1);
+  if (elemDemoSteps[key] === u.demoScript.length - 1) {
+    setTimeout(() => switchPhase(2, key), 1000);
+  }
+  S.loading = false;
+  if (snd) snd.disabled = false;
+}
+
+function submitElemAnswer(key, uid) {
+  const ta = document.getElementById('ans_' + key);
+  const ans = ta ? ta.value.trim() : '';
+  if (!ans) { alert('답안을 먼저 작성해주세요.'); return; }
+  switchPhase(3, key);
+  const u = E_UNITS[uid];
+  const fb = u.fbTemplate;
+  const rubric = u.rubric4;
+  const curIdx = rubric.findIndex(r => r.grade === fb.grade);
+  const cur = rubric[curIdx];
+  const target = curIdx > 0 ? rubric[curIdx-1] : null;
+  const fbCard = document.getElementById('fb-card_' + key);
+  let fbHtml = '<div class="feedback-header"><div class="grade-badge ' + cur.cls + '" style="font-size:11px;width:56px;height:56px;padding:4px">' + cur.grade + '</div><div class="grade-info"><h4>현재 답안은 <b>' + cur.grade + '</b> 수준이에요</h4><p>' + cur.summary + '</p></div></div>';
+  fbHtml += '<div class="my-answer-preview"><div class="my-answer-label">내가 쓴 답안</div><div class="my-answer-text">' + ans.replace(/\n/g,'<br>') + '</div></div>';
+  fbHtml += '<div class="fb-sections"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">3영역 상세 피드백</div>';
+  fb.areas.forEach(a => {
+    fbHtml += '<div class="fb-section"><div class="fb-section-header"><span class="fb-section-icon">' + a.icon + '</span><span class="fb-section-title">' + a.title + '</span><span class="fb-section-score ' + a.scoreCls + '">' + a.score + '</span></div><div class="fb-section-body">' + a.text + '<div class="fb-next">' + a.next + '</div></div></div>';
+  });
+  fbHtml += '</div><div class="example-section"><div class="example-title">성취수준별 예시 답안 — 내가 놓친 것이 무엇인지 확인하세요</div><div class="grade-ladder">';
+  rubric.forEach(r => {
+    const isCur = r.grade === fb.grade, isTarget = target && r.grade === target.grade;
+    fbHtml += '<div class="grade-row ' + (isCur?'current':'') + ' ' + (isTarget?'target':'') + ' ' + (isCur||isTarget?'open':'') + '" onclick="toggleGradeRow(this)">';
+    fbHtml += '<div class="grade-row-header"><div class="grade-lbl ' + r.cls + '" style="font-size:9px;width:auto;padding:3px 8px;border-radius:5px">' + r.grade + '</div><div class="grade-row-title">' + r.summary + '</div>';
+    if (isCur) fbHtml += '<span class="grade-row-badge badge-current">내 수준</span>';
+    if (isTarget) fbHtml += '<span class="grade-row-badge badge-target">목표</span>';
+    fbHtml += '</div><div class="grade-row-body">' + r.answer.replace(/\n/g,'<br>') + (r.missing?'<div class="grade-row-missing">' + r.missing + '</div>':'') + '</div></div>';
+  });
+  fbHtml += '</div></div><div class="rewrite-bar"><button class="rewrite-btn" onclick="switchPhase(2,\'' + key + '\')">✏️ 피드백 반영해서 다시 쓰기</button><button class="compare-btn" onclick="switchPhase(1,\'' + key + '\')">← AI 탐구로 돌아가기</button></div>';
+  fbCard.innerHTML = fbHtml;
+  const tab3 = document.getElementById('ptab_3_' + key);
+  if (tab3) tab3.classList.add('done');
+}
+
+// 초등5 약수와 배수 자동 선택 — 비활성화 (사용자가 직접 선택)
+// setTimeout(() => { const firstBtn = document.querySelector('.unit-btn'); if (firstBtn) firstBtn.click(); }, 200);
+
+
+function demoFillSubject(key, subject, idx) {
+  const sciMsgs = [
+    '철가루는 자석에 붙는 성질이 있어요!',
+    '물에 젖으면 자석으로 분리하기 불편하니까요!',
+    '스타이로폼은 밀도가 작아서 물 위에 뜰 것 같아요.',
+    '모래는 물에 안 녹으니까 거름종이로 걸러낼 수 있어요!',
+    '소금물을 가열하면 물만 증발하고 소금이 남아요!'
+  ];
+  const soMsgs = [
+    '아르바이트하는 청소년들이 임금을 못 받는 경우를 다루고 싶어요.',
+    '침해받은 사람은 알바하는 학생이고, 침해한 사람은 고용주예요.',
+    '임금을 적게 주고 폭언도 하는 상황을 담고 싶어요.',
+    '국가인권위원회랑 법원이요!',
+    '알바생, 사장, 국가인권위원회 담당자, 판사로 하고 싶어요!'
+  ];
+  const msgs = subject === 'science' ? sciMsgs : soMsgs;
+  const ta = document.getElementById('inp_' + key);
+  if (ta) { ta.value = msgs[idx] || ''; ta.focus(); }
+}
+
+
+const DEMO_SCRIPT_SCIENCE = [
+  { user: '철가루는 자석에 붙는 성질이 있어요!',
+    ai: '맞아요! 그게 바로 <b>자성</b>이에요 😊 철가루는 자성이 있어서 자석으로 끌어당길 수 있어요.\n\n그렇다면 혼합물에서 철가루를 분리할 때, 왜 다른 성분보다 <b>먼저</b> 분리해야 할까요?\n\n힌트: 나중에 물을 넣을 건데, 그전에 분리하면 어떤 장점이 있을까요?' },
+  { user: '물에 젖으면 자석으로 분리하기 불편하니까요!',
+    ai: '정확해요! 👏 철가루가 물에 젖으면 달라붙어서 분리가 어려워져요.\n\n1단계: 자석으로 철가루를 먼저 분리 (자성 이용) ✓\n\n자, 이제 남은 건 스타이로폼·모래·소금이에요.\n물을 넣으면 어떻게 될까요? 각 물질의 <b>밀도</b>를 생각해보세요!' },
+  { user: '스타이로폼은 밀도가 작아서 물 위에 뜰 것 같아요.',
+    ai: '완벽해요! 스타이로폼의 밀도가 물(1g/cm³)보다 훨씬 작아서 수면 위로 뜨죠.\n\n2단계: 물에 넣어 스타이로폼을 건져냄 (밀도 차이 이용) ✓\n\n이제 물속에 모래 + 소금물이 남아있어요.\n모래는 물에 녹을까요, 안 녹을까요? 그걸 이용하면 어떻게 분리할 수 있을까요?' },
+  { user: '모래는 물에 안 녹으니까 거름종이로 걸러낼 수 있어요!',
+    ai: '훌륭해요! 용해도 차이를 정확히 파악했어요 😊\n\n3단계: 거름종이로 걸러 모래 분리 (용해도 차이 이용) ✓\n\n마지막으로 소금물만 남았어요. 소금을 어떻게 얻을 수 있을까요?\n소금의 끓는점과 물의 끓는점을 생각해보세요!' },
+  { user: '소금물을 가열하면 물만 증발하고 소금이 남아요!',
+    ai: '완벽한 설계예요! 🎉 4단계까지 완성했어요!\n\n① 자석으로 철가루 분리 (자성)\n② 물에 넣어 스타이로폼 건져냄 (밀도 차이)\n③ 거름종이로 모래 분리 (용해도 차이)\n④ 가열하여 소금 얻음 (끓는점 차이)\n\n이제 이 내용을 바탕으로 답안을 작성해보세요 ✏️\n\n<b>→ 상단 "답안 작성" 탭을 눌러서 내 답안을 작성해보세요!</b>' },
+];
+
+// ── 데모 대화 스크립트 (사회 · 중3 인권 역할극) ──
+const DEMO_SCRIPT_SOCIAL = [
+  { user: '아르바이트하는 청소년들이 임금을 못 받는 경우를 다루고 싶어요.',
+    ai: '좋은 주제예요! <b>청소년 노동 인권 침해</b>는 실생활과 밀접한 중요한 사례죠 😊\n\n역할극을 구성하려면 먼저 이 상황을 정확히 분석해야 해요.\n\n다음을 생각해볼게요:\n① 인권을 <b>침해받은 사람</b>은 누구인가요?\n② 인권을 <b>침해한 사람/기관</b>은 누구인가요?' },
+  { user: '침해받은 사람은 알바하는 학생이고, 침해한 사람은 고용주예요.',
+    ai: '정확해요! 👏 관련 당사자를 잘 파악했어요.\n\n그렇다면 <b>구체적으로 어떤 인권이 침해</b>되고 있는지 생각해봐야 해요.\n\n예를 들면:\n• 최저임금 미지급 → 근로기준법 위반\n• 장시간 노동 강요 → 청소년 보호법 위반\n• 폭언·폭행 → 신체·인격 침해\n\n이 중 어떤 상황을 역할극에 담고 싶으신가요?' },
+  { user: '임금을 적게 주고 폭언도 하는 상황을 담고 싶어요.',
+    ai: '구체적인 상황 설정이 잘 됐어요 😊\n\n이런 인권 침해가 발생했을 때, 피해자가 도움받을 수 있는 <b>국가기관</b>은 어디일까요?\n\n힌트: 세 가지 기관이 있어요.\n• 인권 침해 진정을 접수하는 기관\n• 법을 어긴 사람을 처벌하는 기관\n• 헌법에 관한 판단을 내리는 기관' },
+  { user: '국가인권위원회랑 법원이요!',
+    ai: '완벽해요! 두 기관을 정확히 찾았어요 👏\n\n• <b>국가인권위원회</b>: 진정 접수 → 조사 → 권고 (강제력은 없지만 시정 권고)\n• <b>법원</b>: 형사재판(고용주 처벌), 민사재판(손해배상)\n\n이제 역할극 대본을 구성해봐요!\n등장인물은 누구누구로 할 건가요? 배경은 어디로 설정할까요?' },
+  { user: '알바생, 사장, 국가인권위원회 담당자, 판사로 하고 싶어요!',
+    ai: '훌륭한 구성이에요! 🎉 인권 침해 상황과 구제 기관의 역할을 모두 담을 수 있는 등장인물이에요.\n\n역할극 흐름:\n① 음식점에서 인권 침해 발생 (알바생↔사장)\n② 국가인권위원회에 진정 접수\n③ 법원 재판으로 마무리\n\n이 내용을 바탕으로 사례 분석과 대본을 직접 작성해보세요 ✏️\n\n<b>→ 상단 "사례·대본 작성" 탭을 눌러서 내 답안을 작성해보세요!</b>' },
+];
+
+// 과목별 데모 스텝 관리
+const demoSteps = { math: 0, science: 0, social: 0 };
+
+// 데모 완료 후 답안 자동 채우기
+function autofillAndAdvance(key, subject, accentColor, accentL, accentB) {
+  const answers = {
+    math: '소인수분해는 자연수를 소수들의 곱으로 나타내는 것입니다. 48 = 2×2×2×2×3 입니다.',
+    science: '1단계: 자석으로 철가루를 분리한다.\n2단계: 물에 넣어 스타이로폼을 건진다.\n3단계: 거름종이로 모래를 분리한다.\n4단계: 가열해서 소금을 얻는다.',
+    social: '1. 인권 침해의 종류: 청소년 노동 인권 침해\n2. 침해받은 사람: 아르바이트 청소년 노동자\n3. 침해한 사람/기관: 고용주(사장)\n4. 인권 침해 상황: 최저임금 미지급, 폭언\n5. 구제 기관: 국가인권위원회(진정 접수·권고), 법원(근로기준법 위반 처벌)\n6. 역할극 등장인물: 알바생, 사장, 국가인권위원회 담당자, 판사'
+  };
+  const labels = {
+    math: { color: 'var(--accent)', bg: 'var(--accent-l)', border: 'var(--accent-b)' },
+    science: { color: 'var(--teal)', bg: 'var(--teal-l)', border: 'var(--teal-b)' },
+    social: { color: 'var(--purple)', bg: 'var(--purple-l)', border: 'var(--purple-b)' }
+  };
+  const c = labels[subject];
+
+  setTimeout(() => {
+    const ta = document.getElementById('ans_' + key);
+    if (ta && !ta.value) {
+      ta.value = answers[subject];
+      updateCharCount(key);
+      switchPhase(2, key);
+      setTimeout(() => {
+        const hint = document.createElement('div');
+        hint.style.cssText = `padding:10px 16px;background:${c.bg};border:1px solid ${c.border};border-radius:8px;font-size:13px;color:${c.color};margin-top:8px;`;
+        hint.innerHTML = `✦ <b>C 수준 예시 답안</b>이 자동으로 입력되었어요. "제출하고 피드백 받기" 버튼을 눌러보세요!`;
+        const editorCard = document.querySelector('.editor-card');
+        if (editorCard) editorCard.parentNode.insertBefore(hint, editorCard.nextSibling);
+      }, 300);
+    }
+  }, 600);
+}
+
+async function sendMiddleToAI(key, uid, aid, userMsg) {
+  if (S.loading) return;
+  S.loading = true;
+  const snd = document.getElementById('snd_' + key);
+  if (snd) snd.disabled = true;
+
+  S.history[key].push({ role: 'user', content: userMsg });
+  addBubble(key, 'user', userMsg.replace(/\n/g,'<br>'));
+  showTyping(key);
+
+  await new Promise(r => setTimeout(r, 900));
+  hideTyping(key);
+
+  const step = demoSteps.math;
+  const script = DEMO_SCRIPT[step] || DEMO_SCRIPT[DEMO_SCRIPT.length - 1];
+  const reply = script.ai;
+  addBubble(key, 'ai', reply.replace(/\n/g,'<br>'));
+  S.history[key].push({ role: 'assistant', content: reply });
+  demoSteps.math = Math.min(step + 1, DEMO_SCRIPT.length - 1);
+
+  if (demoSteps.math === DEMO_SCRIPT.length - 1) {
+    autofillAndAdvance(key, 'math');
+  }
+
+  S.loading = false;
+  if (snd) snd.disabled = false;
+}
+
+// ── 과학 중1 단원 데이터 ──
+const S_UNITS = {
+  's1-1': {
+    title: '여러 가지 혼합물의 분리', grade: '중1', semester: '1학기',
+    area: '물질의 성질', time: '수행평가', method: '실험·실습, 보고서, 관찰평가',
+    rubric5: [
+      { grade: 'A', cls: 'grade-A', lv: 'lv-a',
+        summary: '분리 순서와 방법이 과학적으로 합리적이며, 물질의 특성(자성·밀도·용해도·끓는점)을 모두 활용',
+        answer: '1단계(철가루): 자성을 이용해 자석으로 철가루를 먼저 분리합니다. 물을 넣기 전에 분리해야 철가루가 젖지 않아 효율적입니다.\n2단계(스타이로폼): 혼합물에 물을 넣으면 밀도가 매우 작은 스타이로폼이 수면 위로 뜨므로 건져냅니다.\n3단계(모래): 남은 소금물과 모래 혼합물을 거름종이로 거릅니다. 모래는 물에 녹지 않으므로 거름종이 위에 남습니다.\n4단계(소금): 걸러낸 소금물을 증발접시에 담아 알코올 램프로 가열해 물을 증발시키면 소금 결정이 남습니다.',
+        missing: null },
+      { grade: 'B', cls: 'grade-B', lv: 'lv-b',
+        summary: '분리 방법을 단계별로 제시하고 이용된 물질의 특성을 대부분 연결할 수 있음',
+        answer: '1단계: 자석으로 철가루를 분리한다(자성 이용).\n2단계: 물을 넣으면 스타이로폼이 뜨므로 건진다(밀도 차이 이용).\n3단계: 거름종이로 걸러 모래를 분리한다(용해도 차이 이용).\n4단계: 소금물을 가열해 물을 증발시킨다(끓는점 차이 이용).',
+        missing: '✦ A로 올리려면: 왜 철가루를 가장 먼저 분리해야 하는지, 순서의 이유를 과학적으로 설명해보세요.' },
+      { grade: 'C', cls: 'grade-C', lv: 'lv-c',
+        summary: '4단계 분리 순서는 제시했으나 이용된 물질의 특성 서술이 부족함',
+        answer: '1단계: 자석으로 철가루를 분리한다.\n2단계: 물에 넣어 스타이로폼을 건진다.\n3단계: 거름종이로 모래를 분리한다.\n4단계: 가열해서 소금을 얻는다.',
+        missing: '✦ B로 올리려면: 각 단계에서 이용된 물질의 특성(자성, 밀도 차이, 용해도 차이, 끓는점 차이)을 명시해보세요.' },
+      { grade: 'D', cls: 'grade-D', lv: 'lv-d',
+        summary: '일부 성분만 분리 가능하고 순서가 일부 비합리적임',
+        answer: '물을 넣고 스타이로폼을 건진 다음, 자석으로 철가루를 분리하고, 모래와 소금을 분리한다.',
+        missing: '✦ C로 올리려면: 철가루는 물에 젖기 전에 먼저 분리해야 합니다. 4단계 순서를 재검토하고, 각 단계의 방법을 구체적으로 써보세요.' },
+      { grade: 'E', cls: 'grade-E', lv: 'lv-d',
+        summary: '혼합물 분리 방법이 매우 부족하거나 불완전함',
+        answer: '소금물에서 소금을 분리하고 모래를 건진다.',
+        missing: '✦ D로 올리려면: 4가지 성분(철가루, 스타이로폼, 모래, 소금) 각각을 어떻게 분리할지 단계별로 생각해보세요. 각 물질의 특징(자석에 붙는지, 물에 뜨는지, 물에 녹는지)을 먼저 정리해봐요.' },
+    ],
+    fbTemplate: {
+      grade: 'C',
+      areas: [
+        { icon: '🔬', title: '실험 설계의 논리성', score: '보통', scoreCls: 'score-mid',
+          text: '4가지 성분을 분리하는 순서는 대체로 합리적이에요. 자석→스타이로폼→모래→소금 순서는 과학적으로 맞아요.',
+          next: '→ 각 단계에서 왜 그 순서여야 하는지, 순서가 바뀌면 어떤 문제가 생기는지 설명해보세요.' },
+        { icon: '⚗️', title: '물질의 특성 연결', score: '미흡', scoreCls: 'score-low',
+          text: '분리 방법은 맞게 썼지만 "왜 이 방법으로 분리되는지" — 즉 이용된 물질의 특성(자성, 밀도, 용해도, 끓는점)을 서술하지 않았어요.',
+          next: '→ 각 단계마다 "자성을 이용", "밀도 차이를 이용", "용해도 차이를 이용", "끓는점 차이를 이용"처럼 특성을 명시해보세요.' },
+        { icon: '💡', title: '과학적 사고력', score: '미흡', scoreCls: 'score-low',
+          text: '실험 순서의 이유(예: 철가루를 먼저 분리하는 이유)나 생활 속 혼합물 분리 사례가 없어요.',
+          next: '→ 철가루를 가장 먼저 분리하면 왜 좋은지 한 문장으로 설명해보세요.' },
+      ]
+    },
+    acts: [{
+      id: 'a1', label: '탐구 1', sublabel: '혼합물 분리 설계', tag: 'tag-teal',
+      tagText: '실험설계 · 중1 과학',
+      title: '소금, 스타이로폼, 모래, 철가루가 섞인 혼합물을 단계별로 분리하는 방법을 설계하시오.',
+      body: `<span class="hl" style="background:var(--teal-l);color:var(--teal);border:1px solid var(--teal-b)">소금(염화나트륨)</span> · <span class="hl" style="background:var(--teal-l);color:var(--teal);border:1px solid var(--teal-b)">스타이로폼 가루</span> · <span class="hl" style="background:var(--teal-l);color:var(--teal);border:1px solid var(--teal-b)">모래</span> · <span class="hl" style="background:var(--teal-l);color:var(--teal);border:1px solid var(--teal-b)">철가루</span>가 섞여 있습니다.<br><br>
+물질의 특성(자성, 밀도, 용해도, 끓는점)을 이용하여 4가지 성분을 모두 분리하는 <b>단계별 실험 방법</b>을 설계하고, 각 단계에서 이용된 물질의 특성을 함께 서술하시오.<br><br>
+<span style="font-size:12px;color:var(--text3)">성취기준: [9과13-03][9과13-04][9과13-05] · 평가 방법: 보고서 평가, 관찰평가 · 총 16점</span>`,
+      placeholder: '각 단계별 분리 방법과 이용된 물질의 특성을 써보세요.\n예) 1단계: 자석으로 철가루를 분리한다 (자성 이용)\nEnter 전송 / Shift+Enter 줄바꿈',
+      pills: ['각 물질의 특징 알려줘', '어떤 특성을 이용하나요?', '순서를 어떻게 정하나요?', '내 설계 확인해줘'],
+      pillKeys: ['props','methods','order','check'],
+      system: `당신은 중학교 1학년 과학 수행평가를 도와주는 AI 튜터입니다.
+
+【 수행평가 과제 】
+소금(염화나트륨), 스타이로폼 가루, 모래, 철가루가 섞인 혼합물을 4단계로 분리하는 실험을 설계하기.
+
+【 핵심 지식 】
+- 철가루: 자성 있음 → 자석으로 분리 (물에 젖기 전에 가장 먼저!)
+- 스타이로폼: 밀도가 물보다 매우 작음 → 물에 넣으면 위로 뜸 → 건져냄
+- 모래: 물에 녹지 않음 (용해도 차이) → 거름종이로 분리
+- 소금: 물에 녹음 → 끓는점 차이(증류/증발)로 물을 증발시켜 분리
+
+【 정답 순서 】
+1단계: 철가루 (자성) → 2단계: 스타이로폼 (밀도) → 3단계: 모래 (용해도/거름) → 4단계: 소금 (끓는점/증발)
+
+【 A~E 성취수준 】
+A: 4단계 순서와 방법이 합리적이고 각 단계의 물질 특성을 모두 명시, 순서의 이유까지 설명
+B: 4단계 방법과 물질 특성을 대부분 연결
+C: 4단계 순서는 맞으나 물질의 특성 서술 부족
+D: 일부 단계가 틀리거나 순서가 비합리적
+E: 분리 방법이 매우 부족하거나 불완전
+
+【 지도 원칙 】
+- 정답을 직접 알려주지 않는다
+- 각 물질의 특성부터 물어보고, 그 특성을 이용하는 분리 방법으로 연결하도록 유도
+- "철가루의 특징이 뭐가 있을까?" → "그 특성을 이용하면 어떻게 분리할 수 있을까?" 순서
+- 학생 답변에 구체적인 피드백 제공
+- 중학생 수준의 친근한 언어, 한국어로만 답변`
+    }]
+  }
+};
+
+// ── 사회 중3 단원 데이터 ──
+const SO_UNITS = {
+  'so3-1': {
+    title: '인권 침해 문제를 다루는 역할극하기', grade: '중3', semester: '1학기',
+    area: '일반사회(인권)', time: '수행평가', method: '프로젝트, 관찰평가',
+    rubric5: [
+      { grade: 'A', cls: 'grade-A', lv: 'lv-a',
+        summary: '인권 침해 사례를 찾아 분석하고, 해당 사례에 적합한 국가기관의 구제 방법을 조사하여 설명',
+        answer: '【인권 침해 종류】 청소년 노동 인권 침해\n【침해받은 사람】 아르바이트를 하는 청소년 노동자\n【침해한 사람/기관】 청소년을 고용한 고용주\n【구체적 상황】 만 15세 미만 청소년을 부모 동의 없이 고용, 주말 10시간 이상 장시간 노동 강요, 최저임금(시급 6,470원) 미만 지급, 폭언·폭행, 병원 치료 거부\n【구제 기관】 법원(형사재판으로 근로기준법 위반 처벌, 민사재판으로 손해배상), 국가인권위원회(진정 접수 및 권고)\n【역할극 구성】 기자·법정·청소년 노동자·사장·재판장이 등장하는 법정 역할극으로 인권 침해 상황과 구제 과정을 생동감 있게 표현',
+        missing: null },
+      { grade: 'B', cls: 'grade-B', lv: 'lv-b',
+        summary: '인권 침해 사례와 국가기관에 의한 구제 방법을 조사하여 제시',
+        answer: '청소년 노동 인권 침해 사례를 선정함. 고용주가 최저임금을 주지 않고, 주말에 오래 일을 시키며, 폭언을 함. 법원에서 근로기준법 위반으로 처벌받을 수 있고, 국가인권위원회에 진정을 낼 수 있음.',
+        missing: '✦ A로 올리려면: 구체적인 법 조항(근로기준법 제69조, 최저임금법 등)과 법원·국가인권위원회의 역할을 더 자세히 서술하고, 역할극 대본에 구제 기관의 역할이 명확히 드러나도록 구성해보세요.' },
+      { grade: 'C', cls: 'grade-C', lv: 'lv-c',
+        summary: '인권 침해 사례를 제시하고 구제 기관 이름을 언급하나 역할이 불명확',
+        answer: '아르바이트하는 학생이 돈을 제대로 못 받는 사례. 법원이나 국가인권위원회에서 해결할 수 있다.',
+        missing: '✦ B로 올리려면: 법원과 국가인권위원회가 구체적으로 어떤 역할을 하는지(형사재판, 민사재판, 진정 접수 등) 서술해보세요. 역할극 대본에서 구제 기관이 어떤 행동을 하는지도 포함해주세요.' },
+      { grade: 'D', cls: 'grade-D', lv: 'lv-d',
+        summary: '인권 침해 사례만 제시하고 구제 방법이 없음',
+        answer: '아르바이트하는 청소년이 불공평한 대우를 받는 경우가 있다.',
+        missing: '✦ C로 올리려면: 인권 침해를 당했을 때 어떤 국가기관(법원, 헌법재판소, 국가인권위원회)에 도움을 받을 수 있는지 조사해서 추가해보세요.' },
+      { grade: 'E', cls: 'grade-E', lv: 'lv-d',
+        summary: '사례 선정이 인권 침해와 관련이 적거나 내용이 매우 부족',
+        answer: '인권은 중요하다.',
+        missing: '✦ D로 올리려면: 실제 인권이 침해되는 구체적인 사례(이주노동자 차별, 청소년 노동, 성차별, 피의자 인권 등)를 하나 선정하고, 누구의 어떤 인권이 어떻게 침해되었는지 구체적으로 써보세요.' },
+    ],
+    fbTemplate: {
+      grade: 'C',
+      areas: [
+        { icon: '📋', title: '사례의 적절성', score: '보통', scoreCls: 'score-mid',
+          text: '청소년 노동 인권 침해 사례를 선정한 것은 적절해요. 침해받은 사람과 침해한 사람도 제시했어요.',
+          next: '→ 구체적인 인권 침해 상황(어떤 법이 어떻게 위반됐는지)을 더 자세히 정리해보세요.' },
+        { icon: '⚖️', title: '구제 기관의 역할 이해', score: '미흡', scoreCls: 'score-low',
+          text: '법원과 국가인권위원회를 언급했지만 각 기관이 구체적으로 어떤 역할을 하는지 서술하지 않았어요.',
+          next: '→ 법원: 형사재판(처벌)·민사재판(손해배상), 국가인권위원회: 진정 접수·조사·권고 — 이렇게 역할을 구분해서 써보세요.' },
+        { icon: '🎭', title: '역할극 구성 및 창의성', score: '미흡', scoreCls: 'score-low',
+          text: '역할극 대본 구성에서 인권 침해 상황과 구제 기관의 역할이 충분히 드러나지 않아요.',
+          next: '→ 대본에 등장인물(피해자, 가해자, 기관 담당자 등)이 명확히 구분되고, 구제 기관이 개입하는 장면을 포함해보세요.' },
+      ]
+    },
+    acts: [{
+      id: 'a1', label: '탐구 1', sublabel: '사례 분석 & 역할극 준비', tag: 'tag-purple',
+      tagText: '프로젝트 · 중3 사회',
+      title: '인권 침해 사례를 선정하고, 구제 방안이 담긴 역할극 대본을 구성하시오.',
+      body: `일상생활에서 <span class="hl" style="background:var(--purple-l);color:var(--purple);border:1px solid var(--purple-b)">인권이 침해되는 사례</span>를 하나 선정하고, 다음 내용을 포함한 <b>역할극 대본</b>을 모둠별로 준비하세요.<br><br>
+① 인권 침해의 종류와 관련 당사자 (침해받은 사람 / 침해한 사람)<br>
+② 인권 침해의 구체적인 상황<br>
+③ 인권 침해 구제를 위한 관련 국가기관과 그 역할<br>
+④ 역할극 대본 (등장인물, 인권 침해 상황, 구제 기관의 역할이 포함될 것)<br><br>
+<span style="font-size:12px;color:var(--text3)">성취기준: [9사(일사)06-02] · 평가 방법: 관찰평가, 보고서 평가 · 총 18점</span>`,
+      placeholder: '선정한 인권 침해 사례와 구제 방안을 써보세요.\n예) 이주 노동자 차별, 성차별, 청소년 노동 인권, 피의자 인권 침해 등\nEnter 전송 / Shift+Enter 줄바꿈',
+      pills: ['어떤 사례를 고를까요?', '구제 기관이 뭐가 있나요?', '역할극 대본 어떻게 써요?', '내 답 확인해줘'],
+      pillKeys: ['case','org','script','check'],
+      system: `당신은 중학교 3학년 사회(인권) 수행평가를 도와주는 AI 튜터입니다.
+
+【 수행평가 과제 】
+인권 침해 사례 선정 → 역할극 대본 작성 → 상연
+
+【 핵심 지식 】
+인권 침해 사례 예시:
+- 청소년 노동 인권: 최저임금 미지급, 장시간 노동, 폭언·폭행
+- 이주 노동자 차별: 임금 차별, 언어 차별, 열악한 근무환경
+- 성차별: 면접 시 결혼·출산 질문, 채용 성차별
+- 피의자 인권: 영장 없는 체포, 미란다 원칙 미고지, 변호사 선임 방해
+
+국가기관:
+- 법원: 형사재판(처벌), 민사재판(손해배상), 위헌법률심판 제청
+- 헌법재판소: 위헌법률심판, 헌법소원심판
+- 국가인권위원회: 진정 접수, 조사, 권고(강제력 없음)
+
+【 A~E 성취수준 】
+A: 사례 분석, 구제 기관 역할, 역할극 구성 모두 구체적이고 개연성 있음
+B: 사례와 구제 기관을 제시하나 역할의 구체성 일부 부족
+C: 사례와 기관 이름은 있으나 역할 설명이 불명확
+D: 사례만 있고 구제 방법이 없음
+E: 인권 침해와 관련성이 낮거나 내용 부족
+
+【 지도 원칙 】
+- 정답을 직접 알려주지 않는다
+- 사례 선정 → 당사자 파악 → 구체적 침해 상황 → 구제 기관 순서로 유도
+- 역할극 대본 작성 시: 등장인물, 배경, 구제 기관 개입 장면 포함하도록 안내
+- 중학생 수준의 친근한 언어, 한국어로만 답변`
+    }]
+  }
+};
+
+// ── 과학 단원 선택 ──
+function selectScienceUnit(unitId, btn) {
+  document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const u = S_UNITS[unitId];
+  const welcome = document.getElementById('welcome-msg');
+  if (welcome) welcome.style.display = 'none';
+
+  const rubricBox = document.getElementById('rubric-content');
+  rubricBox.innerHTML = `<table>${u.rubric5.map(r=>`<tr><td><span class="lv ${r.lv}">${r.grade}</span></td><td style="font-size:11px;color:var(--text2);line-height:1.5">${r.summary}</td></tr>`).join('')}</table>`;
+  document.getElementById('sidebar-rubric').style.display = 'block';
+
+  const key = unitId + '_a1';
+  if (!S.history[key]) { S.history[key] = []; S.step[key] = 1; }
+  const a = u.acts[0];
+  const main = document.getElementById('main-area');
+
+  main.innerHTML = `
+    <div class="problem-card">
+      <div class="problem-header">
+        <span class="act-tag ${a.tag}">${a.tagText}</span>
+        <span class="problem-title">${a.title}</span>
+      </div>
+      <div class="problem-body">${a.body}</div>
+    </div>
+
+    <div class="phase-tabs">
+      <div class="phase-tab active" id="ptab_1_${key}" onclick="switchPhase(1,'${key}')">
+        <div class="phase-num">1</div>AI 탐구 대화
+      </div>
+      <div class="phase-tab" id="ptab_2_${key}" onclick="switchPhase(2,'${key}')">
+        <div class="phase-num">2</div>답안 작성
+      </div>
+      <div class="phase-tab" id="ptab_3_${key}" onclick="switchPhase(3,'${key}')">
+        <div class="phase-num">3</div>루브릭 피드백
+      </div>
+    </div>
+
+    <!-- PHASE 1 -->
+    <div class="phase-panel on" id="pp1_${key}">
+      <div class="chat-card">
+        <div class="chat-header">
+          <div class="chat-dot"></div>
+          <div class="chat-hdr-txt">AI 튜터와 함께 실험 설계를 생각해봐요 — 정답은 알려주지 않아요</div>
+        </div>
+        <div class="chat-body" id="chat_${key}">
+          <div class="bbl ai">
+            <div class="bbl-lbl">AI 튜터</div>
+            안녕하세요! 오늘은 <b>혼합물 분리 실험 설계</b> 수행평가를 함께 준비해볼게요 😊<br><br>
+            소금, 스타이로폼, 모래, 철가루가 섞여 있어요. 먼저 각 물질의 <b>특징</b>이 뭔지 생각해볼까요?<br>
+            철가루는 어떤 특징이 있는지 말해줄 수 있어요?
+          </div>
+        </div>
+        <div class="input-area">
+          <div class="input-row">
+            <textarea id="inp_${key}" placeholder="💬 데모: 아래 버튼을 순서대로 눌러보세요 → 전송 버튼 클릭!" onkeydown="hk(event,'${key}')"></textarea>
+            <button class="mic-btn" id="mic_${key}" onclick="toggleMic('${key}')" title="음성으로 말하기">🎤</button>
+            <button class="send-btn" id="snd_${key}" onclick="sendSubjectMsg('${key}','${unitId}','a1','science')" style="background:var(--teal)">전송 ›</button>
+          </div>
+          <div class="voice-status" id="vst_${key}"></div>
+          <div class="pills">
+            <button class="pill" style="background:var(--teal-l);color:var(--teal);border-color:var(--teal-b);font-weight:600" onclick="demoFillSubject('${key}','science',0)">① 자성이 있어요!</button>
+            <button class="pill" onclick="demoFillSubject('${key}','science',1)">② 물에 젖으니까요!</button>
+            <button class="pill" onclick="demoFillSubject('${key}','science',2)">③ 스타이로폼이 떠요!</button>
+            <button class="pill" onclick="demoFillSubject('${key}','science',3)">④ 거름종이로 걸러요!</button>
+            <button class="pill" onclick="demoFillSubject('${key}','science',4)">⑤ 가열하면 소금 남아요!</button>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <button onclick="switchPhase(2,'${key}')" style="padding:9px 20px;background:var(--teal);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">탐구 완료 → 답안 작성하기 ›</button>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-panel" id="pp2_${key}">
+      <div class="editor-card">
+        <div class="editor-header">
+          <div class="editor-header-left">
+            <div class="editor-title">✏️ 실험 설계 답안 작성</div>
+            <div class="editor-hint">AI 없이 혼자 써보는 구간 — 실제 수행평가와 동일한 조건</div>
+          </div>
+          <button class="hint-toggle" onclick="toggleConceptHint('${key}')">💡 개념 힌트</button>
+        </div>
+        <div id="concept-hint_${key}" style="display:none;padding:12px 18px;background:var(--teal-l);border-bottom:1px solid var(--teal-b);font-size:13px;color:#0f5f58;line-height:1.7">
+          <b>물질의 특성만 확인하세요</b><br>
+          · 철가루: 자성 있음 (자석에 붙음)<br>
+          · 스타이로폼: 밀도가 매우 작음 (물에 뜸)<br>
+          · 모래: 물에 녹지 않음 (용해도 차이)<br>
+          · 소금: 물에 녹음, 끓는점 높음 (증발로 분리)
+        </div>
+        <div class="editor-body">
+          <textarea class="answer-textarea" id="ans_${key}"
+            placeholder="4단계 분리 방법을 각 단계별로 서술해보세요.
+
+예시 구조:
+1단계: (분리되는 물질) — 이용된 특성: ___ — 방법: ___
+2단계: ...
+3단계: ...
+4단계: ..."
+            oninput="updateCharCount('${key}')"></textarea>
+        </div>
+        <div class="editor-footer">
+          <div class="char-count" id="cc_${key}">0자 작성 중</div>
+          <button class="submit-btn" onclick="submitSubjectAnswer('${key}','${unitId}','science')" style="background:var(--teal)">제출하고 피드백 받기 →</button>
+        </div>
+      </div>
+      <div style="text-align:left;margin-top:-6px">
+        <button onclick="switchPhase(1,'${key}')" style="padding:7px 14px;background:transparent;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:12px;color:var(--text2);font-family:inherit;cursor:pointer">← AI 탐구로 돌아가기</button>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase-panel" id="pp3_${key}">
+      <div class="feedback-card" id="fb-card_${key}">
+        <div style="padding:40px;text-align:center;color:var(--text3);font-size:14px">
+          📝 답안을 먼저 작성하고 제출하면 피드백이 나타납니다.
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── 사회 단원 선택 ──
+function selectSocialUnit(unitId, btn) {
+  document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const u = SO_UNITS[unitId];
+  const welcome = document.getElementById('welcome-msg');
+  if (welcome) welcome.style.display = 'none';
+
+  const rubricBox = document.getElementById('rubric-content');
+  rubricBox.innerHTML = `<table>${u.rubric5.map(r=>`<tr><td><span class="lv ${r.lv}">${r.grade}</span></td><td style="font-size:11px;color:var(--text2);line-height:1.5">${r.summary}</td></tr>`).join('')}</table>`;
+  document.getElementById('sidebar-rubric').style.display = 'block';
+
+  const key = unitId + '_a1';
+  if (!S.history[key]) { S.history[key] = []; S.step[key] = 1; }
+  const a = u.acts[0];
+  const main = document.getElementById('main-area');
+
+  main.innerHTML = `
+    <div class="problem-card">
+      <div class="problem-header">
+        <span class="act-tag ${a.tag}">${a.tagText}</span>
+        <span class="problem-title">${a.title}</span>
+      </div>
+      <div class="problem-body">${a.body}</div>
+    </div>
+
+    <div class="phase-tabs">
+      <div class="phase-tab active" id="ptab_1_${key}" onclick="switchPhase(1,'${key}')">
+        <div class="phase-num">1</div>AI 탐구 대화
+      </div>
+      <div class="phase-tab" id="ptab_2_${key}" onclick="switchPhase(2,'${key}')">
+        <div class="phase-num">2</div>사례·대본 작성
+      </div>
+      <div class="phase-tab" id="ptab_3_${key}" onclick="switchPhase(3,'${key}')">
+        <div class="phase-num">3</div>루브릭 피드백
+      </div>
+    </div>
+
+    <!-- PHASE 1 -->
+    <div class="phase-panel on" id="pp1_${key}">
+      <div class="chat-card">
+        <div class="chat-header">
+          <div class="chat-dot"></div>
+          <div class="chat-hdr-txt">AI 튜터와 함께 인권 침해 사례를 분석해봐요</div>
+        </div>
+        <div class="chat-body" id="chat_${key}">
+          <div class="bbl ai">
+            <div class="bbl-lbl">AI 튜터</div>
+            안녕하세요! <b>인권 침해와 역할극</b> 수행평가를 함께 준비해봐요 😊<br><br>
+            먼저 생각해볼게요. 여러분이 직접 경험했거나 뉴스에서 봤던 <b>인권 침해 상황</b>이 있나요?<br>
+            어떤 사례를 역할극 주제로 다루고 싶은지 이야기해줄 수 있어요?
+          </div>
+        </div>
+        <div class="input-area">
+          <div class="input-row">
+            <textarea id="inp_${key}" placeholder="💬 데모: 아래 버튼을 순서대로 눌러보세요 → 전송 버튼 클릭!" onkeydown="hk(event,'${key}')"></textarea>
+            <button class="mic-btn" id="mic_${key}" onclick="toggleMic('${key}')" title="음성으로 말하기">🎤</button>
+            <button class="send-btn" id="snd_${key}" onclick="sendSubjectMsg('${key}','${unitId}','a1','social')" style="background:var(--purple)">전송 ›</button>
+          </div>
+          <div class="voice-status" id="vst_${key}"></div>
+          <div class="pills">
+            <button class="pill" style="background:var(--purple-l);color:var(--purple);border-color:var(--purple-b);font-weight:600" onclick="demoFillSubject('${key}','social',0)">① 청소년 알바 사례로!</button>
+            <button class="pill" onclick="demoFillSubject('${key}','social',1)">② 당사자 파악했어요!</button>
+            <button class="pill" onclick="demoFillSubject('${key}','social',2)">③ 임금+폭언 상황이요!</button>
+            <button class="pill" onclick="demoFillSubject('${key}','social',3)">④ 인권위랑 법원이요!</button>
+            <button class="pill" onclick="demoFillSubject('${key}','social',4)">⑤ 등장인물 정했어요!</button>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <button onclick="switchPhase(2,'${key}')" style="padding:9px 20px;background:var(--purple);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">탐구 완료 → 사례·대본 작성하기 ›</button>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-panel" id="pp2_${key}">
+      <div class="editor-card">
+        <div class="editor-header">
+          <div class="editor-header-left">
+            <div class="editor-title">✏️ 인권 침해 사례 & 역할극 대본 작성</div>
+            <div class="editor-hint">AI 없이 혼자 써보는 구간 — 실제 수행평가와 동일한 조건</div>
+          </div>
+          <button class="hint-toggle" onclick="toggleConceptHint('${key}')">💡 개념 힌트</button>
+        </div>
+        <div id="concept-hint_${key}" style="display:none;padding:12px 18px;background:var(--purple-l);border-bottom:1px solid var(--purple-b);font-size:13px;color:#4c1d95;line-height:1.7">
+          <b>국가기관 역할만 확인하세요</b><br>
+          · 법원: 형사재판(처벌), 민사재판(손해배상)<br>
+          · 헌법재판소: 위헌법률심판, 헌법소원심판<br>
+          · 국가인권위원회: 진정 접수·조사·권고
+        </div>
+        <div class="editor-body">
+          <textarea class="answer-textarea" id="ans_${key}"
+            placeholder="아래 내용을 포함해서 작성해보세요:
+
+1. 인권 침해의 종류:
+2. 침해받은 사람:
+3. 침해한 사람/기관:
+4. 인권 침해 상황 (구체적으로):
+5. 구제 기관 및 역할:
+6. 역할극 대본 (등장인물, 배경, 대사):"
+            oninput="updateCharCount('${key}')"></textarea>
+        </div>
+        <div class="editor-footer">
+          <div class="char-count" id="cc_${key}">0자 작성 중</div>
+          <button class="submit-btn" onclick="submitSubjectAnswer('${key}','${unitId}','social')" style="background:var(--purple)">제출하고 피드백 받기 →</button>
+        </div>
+      </div>
+      <div style="text-align:left;margin-top:-6px">
+        <button onclick="switchPhase(1,'${key}')" style="padding:7px 14px;background:transparent;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:12px;color:var(--text2);font-family:inherit;cursor:pointer">← AI 탐구로 돌아가기</button>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase-panel" id="pp3_${key}">
+      <div class="feedback-card" id="fb-card_${key}">
+        <div style="padding:40px;text-align:center;color:var(--text3);font-size:14px">
+          📝 답안을 먼저 작성하고 제출하면 피드백이 나타납니다.
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── 과학·사회 공통 메시지 전송 ──
+const SUBJECT_QUICK = {
+  science: {
+    props: '4가지 물질(철가루, 스타이로폼, 모래, 소금)의 특징을 각각 알려주세요.',
+    methods: '각 물질의 특성을 이용하는 분리 방법이 어떤 것들이 있나요?',
+    order: '분리 순서는 어떻게 정해야 하나요?',
+    check: '제 실험 설계를 확인해주세요. 피드백 부탁해요.'
+  },
+  social: {
+    case: '어떤 인권 침해 사례를 선정하면 좋을까요? 예시를 알려주세요.',
+    org: '인권 침해를 구제하는 국가기관으로 어떤 것들이 있나요?',
+    script: '역할극 대본을 어떻게 구성하면 좋을까요?',
+    check: '제 사례 분석과 대본을 확인해주세요. 피드백 부탁해요.'
+  }
+};
+
+function quickSubjectMsg(key, unitId, aid, subject, pillIdx) {
+  const u = subject === 'science' ? S_UNITS[unitId] : SO_UNITS[unitId];
+  const a = u.acts.find(x => x.id === aid);
+  const pillKey = a.pillKeys[pillIdx];
+  const msg = SUBJECT_QUICK[subject][pillKey] || '질문이 있어요.';
+  sendSubjectMsg(key, unitId, aid, subject, msg);
+}
+
+function sendSubjectMsg(key, unitId, aid, subject, overrideMsg) {
+  const ta = document.getElementById('inp_' + key);
+  const val = overrideMsg || (ta ? ta.value.trim() : '');
+  if (!val || S.loading) return;
+  if (ta && !overrideMsg) ta.value = '';
+  sendSubjectToAI(key, unitId, aid, subject, val);
+}
+
+async function sendSubjectToAI(key, unitId, aid, subject, userMsg) {
+  if (S.loading) return;
+  S.loading = true;
+  const snd = document.getElementById('snd_' + key);
+  if (snd) snd.disabled = true;
+
+  const u = subject === 'science' ? S_UNITS[unitId] : SO_UNITS[unitId];
+  const a = u.acts.find(x => x.id === aid);
+  S.history[key].push({ role: 'user', content: userMsg });
+  addBubble(key, 'user', userMsg.replace(/\n/g,'<br>'));
+  showTyping(key);
+
+  // ── 데모 모드 ──
+  const scripts = subject === 'science' ? DEMO_SCRIPT_SCIENCE : DEMO_SCRIPT_SOCIAL;
+  const stepKey = subject; // 'science' or 'social'
+  const step = demoSteps[stepKey];
+
+  await new Promise(r => setTimeout(r, 900));
+  hideTyping(key);
+
+  const entry = scripts[step] || scripts[scripts.length - 1];
+  const reply = entry.ai;
+  addBubble(key, 'ai', reply.replace(/\n/g,'<br>'));
+  S.history[key].push({ role: 'assistant', content: reply });
+  demoSteps[stepKey] = Math.min(step + 1, scripts.length - 1);
+
+  if (demoSteps[stepKey] === scripts.length - 1) {
+    autofillAndAdvance(key, subject);
+  }
+
+  S.loading = false;
+  if (snd) snd.disabled = false;
+}
+
+// ── 과학·사회 답안 제출 및 피드백 ──
+function submitSubjectAnswer(key, unitId, subject) {
+  const ta = document.getElementById('ans_' + key);
+  const ans = ta ? ta.value.trim() : '';
+  if (!ans) { alert('답안을 먼저 작성해주세요.'); return; }
+  switchPhase(3, key);
+
+  const u = subject === 'science' ? S_UNITS[unitId] : SO_UNITS[unitId];
+  const fb = u.fbTemplate;
+  const rubric = u.rubric5;
+  const accentColor = subject === 'science' ? 'var(--teal)' : 'var(--purple)';
+  const accentL = subject === 'science' ? 'var(--teal-l)' : 'var(--purple-l)';
+  const accentB = subject === 'science' ? 'var(--teal-b)' : 'var(--purple-b)';
+
+  const cur = rubric.find(r => r.grade === fb.grade);
+  const targetIdx = rubric.findIndex(r => r.grade === fb.grade) - 1;
+  const target = targetIdx >= 0 ? rubric[targetIdx] : null;
+
+  const fbCard = document.getElementById('fb-card_' + key);
+  fbCard.innerHTML = `
+    <div class="feedback-header">
+      <div class="grade-badge ${cur.cls}">${cur.grade}</div>
+      <div class="grade-info">
+        <h4>현재 답안은 <b>${cur.grade} 수준</b>이에요</h4>
+        <p>${cur.summary}</p>
+      </div>
+    </div>
+    <div class="my-answer-preview">
+      <div class="my-answer-label">내가 쓴 답안</div>
+      <div class="my-answer-text">${ans.replace(/\n/g,'<br>')}</div>
+    </div>
+    <div class="fb-sections">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">3영역 상세 피드백</div>
+      ${fb.areas.map(area => `
+      <div class="fb-section">
+        <div class="fb-section-header">
+          <span class="fb-section-icon">${area.icon}</span>
+          <span class="fb-section-title">${area.title}</span>
+          <span class="fb-section-score ${area.scoreCls}">${area.score}</span>
+        </div>
+        <div class="fb-section-body">
+          ${area.text}
+          <div class="fb-next" style="background:${accentL};border-left-color:${accentColor};color:${accentColor}">${area.next}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="example-section">
+      <div class="example-title">등급별 예시 답안 — 내가 놓친 것이 무엇인지 확인하세요</div>
+      <div class="grade-ladder">
+        ${rubric.map(r => {
+          const isCur = r.grade === fb.grade;
+          const isTarget = target && r.grade === target.grade;
+          return `<div class="grade-row ${isCur?'current':''} ${isTarget?'target':''} ${isCur||isTarget?'open':''}" onclick="toggleGradeRow(this)">
+            <div class="grade-row-header">
+              <div class="grade-lbl ${r.cls}">${r.grade}</div>
+              <div class="grade-row-title">${r.summary}</div>
+              ${isCur?'<span class="grade-row-badge badge-current">내 수준</span>':''}
+              ${isTarget?'<span class="grade-row-badge badge-target">목표</span>':''}
+            </div>
+            <div class="grade-row-body">
+              ${r.answer.replace(/\n/g,'<br>')}
+              ${r.missing ? `<div class="grade-row-missing" style="background:${accentL};border-left-color:${accentColor};color:${accentColor}">${r.missing}</div>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="rewrite-bar">
+      <button class="rewrite-btn" onclick="switchPhase(2,'${key}')" style="background:${accentColor}">✏️ 피드백 반영해서 다시 쓰기</button>
+      <button class="compare-btn" onclick="switchPhase(1,'${key}')">← AI 탐구로 돌아가기</button>
+    </div>`;
+
+  const tab3 = document.getElementById('ptab_3_' + key);
+  if (tab3) tab3.classList.add('done');
+}
+
+// 초기 subject 설정
+S.subject = 'math';
+</script>
+</body>
+</html>
