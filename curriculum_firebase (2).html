@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>중1-1 수학 커리큘럼</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #f4f3ef;
+    --surface: #ffffff;
+    --border: #e0ddd6;
+    --text: #1a1814;
+    --muted: #8a8680;
+    --accent: #2d5be3;
+    --l0-bg: #1a1814;
+    --l1: #2d5be3; --l1-bg: #edf0fc; --l1-hover: #dde4fa;
+    --l2: #0e8a5f; --l2-bg: #edf7f3; --l2-hover: #d4f0e6;
+    --l3: #c45c00; --l3-bg: #fdf3ea; --l3-hover: #fbe5d0;
+    --l4: #7a4db8; --l4-bg: #f5f0fc;
+    --tag-merge: #d97706;
+    --tag-split: #2563eb;
+    --tag-delete: #dc2626;
+    --tag-review: #7c3aed;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--l0-bg);
+    color: #fff;
+    padding: 22px 32px 18px;
+    display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;
+  }
+  .header-title .grade-tag {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.14em;
+    color: #888; margin-bottom: 5px; font-family: 'DM Mono', monospace;
+  }
+  .header-title h1 { font-size: 20px; font-weight: 700; color: #fff; }
+  .header-stats { display: flex; gap: 20px; font-family: 'DM Mono', monospace; }
+  .stat { text-align: right; }
+  .stat-num { font-size: 20px; font-weight: 500; color: #fff; line-height: 1; }
+  .stat-label { font-size: 10px; color: #777; letter-spacing: 0.08em; margin-top: 2px; }
+
+  .tabs {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    padding: 0 32px;
+    display: flex; gap: 0;
+  }
+  .tab {
+    font-size: 13px; font-weight: 600;
+    padding: 12px 20px; cursor: pointer;
+    color: var(--muted); border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: all 0.15s; white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .toolbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 10px 32px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .toolbar-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.06em; }
+  .btn {
+    font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500;
+    padding: 5px 13px; border-radius: 6px;
+    border: 1.5px solid var(--border); background: var(--surface); color: var(--text);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #2450c7; }
+  .sep { width: 1px; height: 18px; background: var(--border); }
+
+  .search-wrap { margin-left: auto; position: relative; }
+  .search-wrap input {
+    font-family: 'Noto Sans KR', sans-serif; font-size: 13px;
+    padding: 6px 12px 6px 32px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    background: var(--bg); color: var(--text); outline: none; width: 200px;
+    transition: border-color 0.15s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; pointer-events: none; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* TREE */
+  .tree-container { padding: 20px 32px 60px; }
+
+  .node-l0 { margin-bottom: 18px; }
+  .node-l0 > .node-header {
+    background: var(--l0-bg); color: #fff; border-radius: 10px;
+    padding: 13px 16px; font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; user-select: none; transition: opacity 0.15s;
+  }
+  .node-l0 > .node-header:hover { opacity: 0.88; }
+  .node-l1 { margin: 7px 0 3px 18px; }
+  .node-l1 > .node-header {
+    background: var(--l1-bg); color: var(--l1);
+    border-left: 3px solid var(--l1); border-radius: 0 8px 8px 0;
+    padding: 9px 14px; font-size: 13.5px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; user-select: none; transition: background 0.12s;
+  }
+  .node-l1 > .node-header:hover { background: var(--l1-hover); }
+  .node-l2 { margin: 4px 0 2px 18px; }
+  .node-l2 > .node-header {
+    background: var(--l2-bg); color: var(--l2);
+    border-left: 3px solid var(--l2); border-radius: 0 7px 7px 0;
+    padding: 8px 13px; font-size: 12.5px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; user-select: none; transition: background 0.12s;
+  }
+  .node-l2 > .node-header:hover { background: var(--l2-hover); }
+  .node-l3 { margin: 3px 0 1px 18px; }
+  .node-l3 > .node-header {
+    background: var(--l3-bg); color: var(--l3);
+    border-left: 3px solid var(--l3); border-radius: 0 6px 6px 0;
+    padding: 6px 13px; font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; user-select: none; transition: background 0.12s;
+  }
+  .node-l3 > .node-header:hover { background: var(--l3-hover); }
+  .node-l4 {
+    margin: 2px 0 1px 18px; padding: 5px 13px;
+    font-size: 11.5px; color: var(--l4);
+    border-left: 2px solid #c8b8e8; background: var(--l4-bg);
+    border-radius: 0 5px 5px 0;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .node-l4::before { content: '•'; font-size: 9px; opacity: 0.5; flex-shrink: 0; }
+
+  .node-children { padding: 6px 0 3px 10px; border-left: 1px solid #e6e2dc; margin-left: 14px; }
+  .node-l0 > .node-children { border-left: none; padding-left: 0; margin-left: 0; }
+
+  .arrow { font-size: 9px; transition: transform 0.2s; flex-shrink: 0; margin-left: 2px; opacity: 0.5; }
+  .collapsed .arrow { transform: rotate(-90deg); }
+
+  .badge {
+    font-size: 10px; font-family: 'DM Mono', monospace;
+    padding: 1px 6px; border-radius: 20px; font-weight: 400; flex-shrink: 0;
+  }
+  .node-l0 .badge { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); }
+  .node-l1 .badge { background: rgba(45,91,227,0.12); color: var(--l1); }
+  .node-l2 .badge { background: rgba(14,138,95,0.12); color: var(--l2); }
+  .node-l3 .badge { background: rgba(196,92,0,0.12); color: var(--l3); }
+
+  .node-name { flex: 1; line-height: 1.4; }
+
+  .level-tag {
+    font-family: 'DM Mono', monospace; font-size: 9.5px; font-weight: 500;
+    letter-spacing: 0.04em; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
+  }
+  .node-l0 > .node-header .level-tag { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); }
+  .node-l1 > .node-header .level-tag { background: rgba(45,91,227,0.09); color: var(--l1); border: 1px solid rgba(45,91,227,0.2); }
+  .node-l2 > .node-header .level-tag { background: rgba(14,138,95,0.09); color: var(--l2); border: 1px solid rgba(14,138,95,0.2); }
+
+  .memo-tags { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  .mtag {
+    font-size: 9.5px; font-weight: 600; padding: 2px 7px; border-radius: 20px;
+    cursor: default; white-space: nowrap; border: 1px solid transparent;
+  }
+  .mtag-merge  { background: #fef3c7; color: var(--tag-merge);  border-color: #fcd34d; }
+  .mtag-split  { background: #dbeafe; color: var(--tag-split);  border-color: #93c5fd; }
+  .mtag-delete { background: #fee2e2; color: var(--tag-delete); border-color: #fca5a5; }
+  .mtag-review { background: #ede9fe; color: var(--tag-review); border-color: #c4b5fd; }
+
+  .density-bar-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .density-bar { height: 6px; border-radius: 3px; min-width: 4px; max-width: 80px; }
+  .density-num { font-size: 10px; font-family: 'DM Mono', monospace; opacity: 0.6; }
+
+  .edit-btn {
+    font-size: 10px; padding: 1px 7px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); cursor: pointer;
+    opacity: 0; transition: opacity 0.15s; white-space: nowrap;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .node-header:hover .edit-btn { opacity: 1; }
+
+  .highlight { background: #fde047; border-radius: 2px; color: #000; }
+
+  /* ANALYSIS */
+  .analysis-container { padding: 24px 32px 60px; }
+  .analysis-section { margin-bottom: 32px; }
+  .analysis-title {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    margin-bottom: 14px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .analysis-title .icon { font-size: 16px; }
+  .density-grid { display: grid; gap: 7px; }
+  .density-row {
+    display: grid; grid-template-columns: 200px 1fr 40px;
+    align-items: center; gap: 10px; font-size: 12px;
+  }
+  .density-row .label { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .density-row .bar-track { background: #e8e5e0; border-radius: 4px; height: 10px; overflow: hidden; }
+  .density-row .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+  .density-row .val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: right; }
+  .bar-low    { background: #86efac; }
+  .bar-mid    { background: #fbbf24; }
+  .bar-high   { background: #f97316; }
+  .bar-excess { background: #ef4444; }
+  .heatmap-wrap { overflow-x: auto; }
+  .heatmap-table { border-collapse: collapse; width: 100%; font-size: 11px; }
+  .heatmap-table th { background: var(--bg); padding: 6px 10px; font-weight: 600; color: var(--muted); text-align: left; white-space: nowrap; }
+  .heatmap-table td { padding: 6px 10px; border-top: 1px solid var(--border); }
+  .heatmap-cell { display: inline-block; padding: 2px 8px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; }
+  .heat-0 { background: #f0fdf4; color: #15803d; }
+  .heat-1 { background: #fef9c3; color: #b45309; }
+  .heat-2 { background: #ffedd5; color: #c2410c; }
+  .heat-3 { background: #fee2e2; color: #b91c1c; }
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .scard { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .scard-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .scard-val { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; }
+  .scard-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* MEMO */
+  .memo-container { padding: 24px 32px 60px; }
+  .memo-list { display: grid; gap: 8px; }
+  .memo-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; }
+  .memo-item-left { flex: 1; }
+  .memo-path { font-size: 10px; color: var(--muted); margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+  .memo-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .memo-text { font-size: 12px; color: #444; line-height: 1.5; }
+  .memo-item-right { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+  .memo-del { font-size: 11px; color: var(--muted); cursor: pointer; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); background: transparent; }
+  .memo-del:hover { color: #dc2626; border-color: #fca5a5; }
+  .memo-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 13px; }
+
+  /* EXPORT */
+  .export-container { padding: 24px 32px 60px; }
+  .export-section { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .export-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .export-section p { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+  .export-preview { background: var(--bg); border-radius: 6px; padding: 12px 14px; font-size: 11px; font-family: 'DM Mono', monospace; line-height: 1.7; color: #444; white-space: pre-wrap; max-height: 160px; overflow-y: auto; margin-bottom: 12px; }
+
+  /* UPLOAD */
+  .onedrive-panel {
+    background: #f0f4ff; border: 1.5px solid #c0cef7; border-radius: 10px;
+    padding: 12px 16px; margin: 12px 32px 0;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .onedrive-info strong { font-size: 12px; color: var(--l1); display: block; margin-bottom: 2px; }
+  .onedrive-info span { font-size: 11px; color: var(--muted); }
+  .onedrive-url-wrap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .onedrive-url-wrap input { font-family: 'DM Mono', monospace; font-size: 11px; padding: 5px 10px; border: 1.5px solid var(--border); border-radius: 6px; background: #fff; color: var(--text); width: 260px; outline: none; }
+  .onedrive-url-wrap input:focus { border-color: var(--accent); }
+  #onedrive-status { font-size: 11px; color: var(--muted); }
+  .upload-section { margin: 0 32px; padding: 10px 0; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .upload-section label { font-size: 12px; color: var(--muted); }
+  #fileInput { display: none; }
+  .upload-btn { font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 6px; border: 1.5px dashed #c0bbb4; background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #upload-status { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 14px; padding: 24px 26px; width: 440px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+  .modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .modal .modal-path { font-size: 11px; color: var(--muted); margin-bottom: 16px; font-family: 'DM Mono', monospace; }
+  .modal label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; margin-top: 14px; font-weight: 500; }
+  .modal textarea { width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 7px; background: var(--bg); color: var(--text); outline: none; min-height: 80px; resize: vertical; transition: border-color 0.15s; }
+  .modal textarea:focus { border-color: var(--accent); }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+  .tag-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .tag-option { padding: 5px 13px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+  .tag-option.merge  { background: #fef3c7; color: var(--tag-merge);  border-color: #fcd34d; }
+  .tag-option.split  { background: #dbeafe; color: var(--tag-split);  border-color: #93c5fd; }
+  .tag-option.delete { background: #fee2e2; color: var(--tag-delete); border-color: #fca5a5; }
+  .tag-option.review { background: #ede9fe; color: var(--tag-review); border-color: #c4b5fd; }
+  .tag-option { opacity: 0.5; }
+  .tag-option.selected { opacity: 1; box-shadow: 0 0 0 2px currentColor; }
+
+  /* ── TOPIC TOOLTIP ─────────────────────────────── */
+  .topic-tooltip {
+    position: fixed;
+    z-index: 500;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 13px;
+    min-width: 220px; max-width: 340px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .topic-tooltip.visible {
+    opacity: 1;
+  }
+  .topic-tooltip-title {
+    font-size: 10px; font-weight: 600; color: var(--muted);
+    letter-spacing: 0.07em; margin-bottom: 7px;
+    border-bottom: 1px solid var(--border); padding-bottom: 5px;
+  }
+  .topic-tooltip-item {
+    font-size: 11.5px; color: var(--l4);
+    padding: 2px 0;
+    display: flex; align-items: baseline; gap: 6px;
+    line-height: 1.45;
+  }
+  .topic-tooltip-item::before {
+    content: '·'; font-size: 14px; color: #c8b8e8; flex-shrink: 0;
+  }
+  .topic-tooltip-empty {
+    font-size: 11px; color: var(--muted); font-style: italic;
+  }
+  /* wrapper needs position:relative for tooltip to anchor correctly */
+  .node-l3 { position: relative; }
+  body.edit-mode .edit-btn { opacity: 1 !important; }
+  body.edit-mode .node-header { cursor: default; }
+  body.edit-mode .node-header .node-name { cursor: text; }
+
+  .edit-mode-banner {
+    display: none; background: #fffbeb; border-bottom: 2px solid #f59e0b;
+    padding: 7px 32px; font-size: 12px; color: #92400e;
+    align-items: center; gap: 10px;
+  }
+  body.edit-mode .edit-mode-banner { display: flex; }
+
+  .inline-input {
+    font-family: 'Noto Sans KR', sans-serif; font-size: inherit; font-weight: inherit;
+    border: none; outline: 2px solid var(--accent); border-radius: 4px;
+    background: rgba(255,255,255,0.92); color: var(--text);
+    padding: 1px 6px; flex: 1; min-width: 80px;
+  }
+
+  .node-edit-controls {
+    display: flex; gap: 3px; align-items: center; flex-shrink: 0;
+    opacity: 0; transition: opacity 0.12s;
+  }
+  .node-header:hover .node-edit-controls,
+  body.edit-mode .node-edit-controls { opacity: 1; }
+
+  .ebi { /* edit button icon */
+    font-size: 11px; padding: 2px 7px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); cursor: pointer; white-space: nowrap;
+    font-family: 'Noto Sans KR', sans-serif; transition: all 0.12s;
+    line-height: 1.5;
+  }
+  .ebi:hover { background: var(--bg); }
+  .ebi.rename:hover { color: var(--accent); border-color: var(--accent); }
+  .ebi.del:hover { color: #dc2626; border-color: #fca5a5; background: #fff0f0; }
+  .ebi.add:hover { color: #16a34a; border-color: #86efac; background: #f0fdf4; }
+  .ebi.up:hover, .ebi.dn:hover { color: #7c3aed; border-color: #c4b5fd; }
+
+  /* ── MERGE / SPLIT ─────────────────────────────── */
+  .node-l3[draggable], .node-l4[draggable] { cursor: grab; }
+  .node-l3.drag-src > .node-header,
+  .node-l4.drag-src { opacity: 0.35; }
+
+  .node-l3.drop-target > .node-header {
+    outline: 2px dashed var(--accent);
+    outline-offset: -2px;
+    background: #dde4fa !important;
+  }
+  .node-l4.drop-target {
+    outline: 2px dashed var(--l4);
+    outline-offset: -2px;
+    background: #ede9fe !important;
+  }
+  /* 소단원으로 유형 이동 시 드롭 타겟 */
+  .node-l2.drop-target-move > .node-header {
+    outline: 2px dashed var(--l2);
+    outline-offset: -2px;
+    background: #d4f0e6 !important;
+  }
+  .node-l2.drop-target-move > .node-header::after {
+    content: ' ← 여기로 이동';
+    font-size: 10px; color: var(--l2); font-weight: 600;
+  }
+
+  /* merged node name — parts separated by · */
+  .merged-name {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: 0; flex: 1; line-height: 1.4;
+  }
+  .merged-part { }
+  .merged-sep {
+    color: #94a3b8; font-size: 1em; font-weight: 700;
+    margin: 0 6px; user-select: none;
+  }
+
+  /* split button on merged items */
+  .split-btn {
+    font-size: 10px; padding: 1px 7px; border-radius: 4px;
+    border: 1px solid #c8b8e8; background: #f5f0fc;
+    color: var(--l4); cursor: pointer; white-space: nowrap;
+    font-family: 'Noto Sans KR', sans-serif; flex-shrink: 0;
+    opacity: 0; transition: opacity 0.12s;
+  }
+  .node-header:hover .split-btn,
+  .node-l4:hover .split-btn { opacity: 1; }
+  .split-btn:hover { background: #ede9fe; border-color: var(--l4); }
+
+  /* change indicator */
+  .changed-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #f59e0b; flex-shrink: 0; display: none;
+  }
+  body.edit-mode .changed-dot { display: inline-block; }
+
+  /* undo toast */
+  .undo-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1a1814; color: #fff; padding: 10px 18px; border-radius: 8px;
+    font-size: 12px; display: flex; gap: 12px; align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 9999;
+    animation: slideUp 0.2s ease;
+    display: none;
+  }
+  .undo-toast.show { display: flex; }
+  .undo-toast button { background: #f59e0b; color: #000; border: none; border-radius: 5px; padding: 3px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  @keyframes slideUp { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+</style>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, update, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // ══ FIREBASE CONFIG (여기에 본인 설정 입력) ══
+  const firebaseConfig = {
+    apiKey: "AIzaSyAEwZ5kWT1ztU-ipDjpQupkAN5uZAzyYxQ",
+    authDomain: "curriculum0414-a69dd.firebaseapp.com",
+    databaseURL: "https://curriculum0414-a69dd-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "curriculum0414-a69dd",
+    storageBucket: "curriculum0414-a69dd.firebasestorage.app",
+    messagingSenderId: "313154419010",
+    appId: "1:313154419010:web:72974aaa7e8661141270db"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // ══ 전역 노출 (기존 코드와 연결) ══
+  window._fb = { db, ref, onValue, set, update, remove, get };
+  window._fbReady = true;
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <div class="grade-tag">중학교 1학년 · 수학 · 커리큘럼 편집기</div>
+    <h1>커리큘럼 구조 뷰어</h1>
+  </div>
+  <div class="header-stats">
+    <div class="stat"><div class="stat-num" id="s-dae">-</div><div class="stat-label">대단원</div></div>
+    <div class="stat"><div class="stat-num" id="s-jung">-</div><div class="stat-label">중단원</div></div>
+    <div class="stat"><div class="stat-num" id="s-so">-</div><div class="stat-label">소단원</div></div>
+    <div class="stat"><div class="stat-num" id="s-type">-</div><div class="stat-label">유형</div></div>
+    <div class="stat"><div class="stat-num" id="s-topic">-</div><div class="stat-label">주제유형</div></div>
+  </div>
+</header>
+
+<div class="edit-mode-banner">
+  ✏️ <strong>편집 모드 활성</strong> — 항목 위에 마우스를 올려 이름 수정·삭제·추가·이동을 하세요. 변경사항은 자동으로 기억됩니다.
+  <button class="btn" style="margin-left:auto;" onclick="undoLast()">↩ 되돌리기</button>
+  <button class="btn primary" onclick="toggleEditMode()">편집 모드 끄기</button>
+</div>
+<div class="undo-toast" id="undoToast">
+  <span id="undoMsg"></span>
+  <button onclick="undoLast()">되돌리기</button>
+</div>
+
+<div class="onedrive-panel">
+  <div>☁️</div>
+  <div class="onedrive-info">
+    <strong>OneDrive / SharePoint 자동 연동</strong>
+    <span>공유 링크 입력 후 불러오기 → 이후 새로고침 시 자동 반영</span>
+  </div>
+  <div class="onedrive-url-wrap">
+    <input type="text" id="onedriveUrl" placeholder="https://onedrive.live.com/...xlsx" />
+    <button class="btn primary" onclick="loadFromOneDrive()">불러오기</button>
+    <span id="onedrive-status"></span>
+  </div>
+</div>
+
+<div class="upload-section">
+  <label>📂 로컬 업로드:</label>
+  <button class="upload-btn" onclick="document.getElementById('fileInput').click()">파일 선택 (.xlsx)</button>
+  <input type="file" id="fileInput" accept=".xlsx" onchange="handleFile(this)" />
+  <span id="upload-status"></span>
+</div>
+
+<div class="tabs">
+  <div class="tab active"  onclick="switchTab('tree')">📋 트리 뷰</div>
+  <div class="tab" onclick="switchTab('analysis')">📊 밀도 분석</div>
+  <div class="tab" onclick="switchTab('memo')">📝 메모 &amp; 태그 <span id="memo-count-badge"></span></div>
+  <div class="tab" onclick="switchTab('export')">⬇ 내보내기</div>
+</div>
+
+<!-- TREE PANEL -->
+<div id="panel-tree" class="panel active">
+  <div class="toolbar">
+    <span class="toolbar-label">보기</span>
+    <button class="btn" onclick="expandAll()">전체 펼치기</button>
+    <button class="btn" onclick="collapseAll()">전체 접기</button>
+    <div class="sep"></div>
+    <span class="toolbar-label">레벨까지</span>
+    <button class="btn" onclick="expandToLevel(1)">중단원</button>
+    <button class="btn" onclick="expandToLevel(2)">소단원</button>
+    <button class="btn" onclick="expandToLevel(3)">유형</button>
+    <div class="sep"></div>
+    <span class="toolbar-label">유형수 막대</span>
+    <button class="btn" id="densityToggle" onclick="toggleDensity()">ON</button>
+    <div class="sep"></div>
+    <button class="btn" id="editModeBtn" onclick="toggleEditMode()" style="border-color:#f59e0b;color:#92400e;">✏️ 편집 모드</button>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="검색..." oninput="doSearch(this.value)" />
+    </div>
+  </div>
+  <div class="tree-container" id="treeContainer">
+    <div style="text-align:center;color:var(--muted);padding:60px 0;font-size:14px;">불러오는 중...</div>
+  </div>
+</div>
+
+<!-- ANALYSIS PANEL -->
+<div id="panel-analysis" class="panel">
+  <div class="analysis-container" id="analysisContainer"></div>
+</div>
+
+<!-- MEMO PANEL -->
+<div id="panel-memo" class="panel">
+  <div class="memo-container">
+    <div style="margin-bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span style="font-size:12px;color:var(--muted);font-weight:500;">태그 필터:</span>
+      <button class="btn" onclick="filterMemos('')">전체</button>
+      <button class="btn" style="background:#fef3c7;border-color:#fcd34d;color:#d97706;" onclick="filterMemos('merge')">🔀 병합후보</button>
+      <button class="btn" style="background:#dbeafe;border-color:#93c5fd;color:#2563eb;" onclick="filterMemos('split')">✂️ 분리후보</button>
+      <button class="btn" style="background:#fee2e2;border-color:#fca5a5;color:#dc2626;" onclick="filterMemos('delete')">🗑 삭제후보</button>
+      <button class="btn" style="background:#ede9fe;border-color:#c4b5fd;color:#7c3aed;" onclick="filterMemos('review')">⚠️ 검토필요</button>
+    </div>
+    <div class="memo-list" id="memoList">
+      <div class="memo-empty">트리에서 항목 위에 마우스를 올리면 나타나는 <strong>+ 메모</strong> 버튼을 누르세요.</div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT PANEL -->
+<div id="panel-export" class="panel">
+  <div class="export-container">
+    <div class="export-section">
+      <h3>📄 아웃라인 텍스트</h3>
+      <p>들여쓰기 구조 텍스트로 내보냅니다. 회의 자료·문서 붙여넣기에 유용합니다.</p>
+      <div class="export-preview" id="outlinePreview"></div>
+      <button class="btn primary" onclick="exportOutline()">📋 클립보드 복사</button>
+    </div>
+    <div class="export-section">
+      <h3>📊 엑셀 파일 (.xlsx)</h3>
+      <p>현재 트리 구조를 원본과 동일한 형식의 엑셀로 내보냅니다. 메모·태그 시트가 추가됩니다.</p>
+      <button class="btn primary" onclick="exportXlsx()">⬇ 엑셀 다운로드</button>
+    </div>
+    <div class="export-section">
+      <h3>📋 검토 리포트</h3>
+      <p>태그가 붙은 항목들을 모아 검토 리포트 텍스트로 내보냅니다.</p>
+      <div class="export-preview" id="memoPreview"></div>
+      <button class="btn primary" onclick="exportMemoReport()">📋 리포트 복사</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMO MODAL -->
+<div class="modal-overlay" id="memoModal">
+  <div class="modal">
+    <h3>메모 &amp; 태그</h3>
+    <div class="modal-path" id="modalPath"></div>
+    <label>태그 (복수 선택 가능)</label>
+    <div class="tag-grid">
+      <div class="tag-option merge"  onclick="toggleTag('merge')"  id="tag-merge">🔀 병합후보</div>
+      <div class="tag-option split"  onclick="toggleTag('split')"  id="tag-split">✂️ 분리후보</div>
+      <div class="tag-option delete" onclick="toggleTag('delete')" id="tag-delete">🗑 삭제후보</div>
+      <div class="tag-option review" onclick="toggleTag('review')" id="tag-review">⚠️ 검토필요</div>
+    </div>
+    <label>메모</label>
+    <textarea id="memoText" placeholder="예) 중1 소인수분해 단원과 내용 중복, 다음 학기로 이전 검토..."></textarea>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">취소</button>
+      <button class="btn primary" onclick="saveMemo()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ════════════════════════════════════════════════
+// EMBEDDED DATA
+// ════════════════════════════════════════════════
+const EMBEDDED_DATA = [{"name": "Ⅰ. 수와 연산", "children": [{"name": "1. 소인수분해", "children": [{"name": "1-1. 소수와 합성수", "children": [{"name": "① 자연수의 약수와 배수", "children": [{"name": "자연수의 약수", "children": []}, {"name": "자연수의 배수", "children": []}, {"name": "자연수의 약수와 배수에 대한 이해", "children": []}, {"name": "자연수의 약수의 활용", "children": []}, {"name": "자연수의 배수의 활용", "children": []}, {"name": "약수와 배수의 도형에서의 활용", "children": []}, {"name": "약수와 배수의 실생활에서의 활용", "children": []}]}, {"name": "② 배수판별법", "children": [{"name": "배수판별하기", "children": []}, {"name": "배수판별법의 응용", "children": []}]}, {"name": "③ 소수와 합성수", "children": [{"name": "소수와 합성수의 구분", "children": []}, {"name": "소수", "children": []}, {"name": "합성수", "children": []}, {"name": "소수의 활용", "children": []}, {"name": "합성수의 활용", "children": []}, {"name": "소수와 합성수의 실생활에서의 활용", "children": []}]}, {"name": "④ 소수와 합성수의 성질", "children": [{"name": "소수와 합성수의 이해", "children": []}, {"name": "조건을 만족하는 소수와 합성수", "children": []}]}, {"name": "⑤ 곱을 거듭제곱으로 나타내기", "children": [{"name": "자연수의 곱", "children": []}, {"name": "분수 꼴의 곱", "children": []}, {"name": "문자의 곱", "children": []}, {"name": "도형에서의 활용", "children": []}]}, {"name": "⑥ 수를 거듭제곱으로 나타내기", "children": [{"name": "거듭제곱으로 나타내기", "children": []}, {"name": "거듭제곱의 표현의 응용", "children": []}, {"name": "거듭제곱의 표현의 활용", "children": []}]}, {"name": "⑦ 거듭제곱의 밑과 지수", "children": [{"name": "거듭제곱의 밑과 지수", "children": []}, {"name": "거듭제곱의 밑과 지수의 응용", "children": []}]}]}, {"name": "1-2. 소인수분해", "children": [{"name": "① 소인수분해 하기", "children": [{"name": "나눗셈을 이용", "children": []}, {"name": "나눗셈의 세로식을 이용", "children": []}, {"name": "수형도를 이용", "children": []}, {"name": "소인수분해하기", "children": []}]}, {"name": "② 소인수 구하기", "children": [{"name": "소인수 구하기", "children": []}, {"name": "소인수의 응용", "children": []}, {"name": "소인수를 이용하여 자연수 구하기", "children": []}]}, {"name": "③ 소인수분해 한 결과에서 밑과 지수 구하기", "children": [{"name": "자연수의 소인수분해", "children": []}, {"name": "수의 곱의 소인수분해", "children": []}]}, {"name": "④ 제곱인 수 만들기(1) (어떤 수)ⅹa=b^2", "children": [{"name": "제곱수의 판단", "children": []}, {"name": "곱하는 자연수(a)에 대한 문제-자연수의 꼴", "children": []}, {"name": "곱하는 자연수(a)에 대한 문제-소인수분해의 꼴", "children": []}, {"name": "곱하는 자연수(a)에 대한 문제-제곱인 수 만들기 응용", "children": []}, {"name": "제곱이 된 수(b, b^2)에 대한 문제-제곱인 수 만들기", "children": []}, {"name": "제곱이 된 수(b, b^2)에 대한 문제-제곱인 수 만들기 응용", "children": []}]}, {"name": "⑤ 제곱인 수 만들기(2) (어떤 수)/x=(자연수)^2인 경우", "children": [{"name": "제곱인 수 만들기", "children": []}, {"name": "제곱인 수 만들기 응용", "children": []}]}]}, {"name": "1-3. 소인수분해를 이용하여 약수 구하기", "children": [{"name": "① 소인수분해를 이용하여 약수 구하기", "children": [{"name": "주어진 수의 약수 구하기", "children": []}, {"name": "주어진 수의 곱의 약수 구하기", "children": []}, {"name": "응용", "children": []}]}, {"name": "② 약수의 개수 구하기", "children": [{"name": "주어진 수의 약수 구하기", "children": []}, {"name": "응용", "children": []}, {"name": "활용", "children": []}]}, {"name": "③ 약수의 개수가 주어질 때(1)-소인수의 지수 구하기", "children": [{"name": "약수의 개수가 주어진 경우", "children": []}, {"name": "주어진 수의 약수의 개수가 같은 경우", "children": []}, {"name": "지수 구하기 응용", "children": []}]}, {"name": "④ 약수의 개수가 주어진 자연수 구하기", "children": [{"name": "약수의 개수가 주어진 경우", "children": []}, {"name": "약수의 개수의 조건이 주어진 경우", "children": []}, {"name": "자연수 구하기 응용", "children": []}]}, {"name": "⑤ 약수의 개수가 주어질 때(2)-□ 안에 들어갈 수 있는 자연수 구하기", "children": [{"name": "□ 안에 들어갈 수 구하기", "children": []}, {"name": "□ 안에 들어갈 수의 응용", "children": []}, {"name": "처음의 수 구하기", "children": []}]}]}, {"name": "1-4. 최대공약수", "children": [{"name": "① 최대공약수의 성질", "children": [{"name": "두 수의 공약수 구하기", "children": []}, {"name": "세 수의 공약수 구하기", "children": []}]}, {"name": "② 서로소", "children": [{"name": "서로소의 판단", "children": []}, {"name": "서로소의 응용", "children": []}]}, {"name": "③ 공약수와 최대공약수(1) 최대공약수가 주어진 경우", "children": [{"name": "공약수 구하기", "children": []}]}, {"name": "④ 최대공약수 구하기-소인수분해를 이용하는 방법", "children": [{"name": "두 자연수의 최대공약수", "children": []}, {"name": "세 자연수의 최대공약수", "children": []}, {"name": "두 소인수분해꼴의 최대공약수", "children": []}, {"name": "세 소인수분해꼴의 최대공약수", "children": []}]}, {"name": "⑤ 최대공약수 구하기-공약수로 나누어 구하는 방법", "children": [{"name": "두 자연수의 최대공약수", "children": []}, {"name": "세 자연수의 최대공약수", "children": []}]}, {"name": "⑥ 공약수와 최대공약수(2)", "children": [{"name": "두 자연수의 공약수", "children": []}, {"name": "세 자연수의 공약수", "children": []}, {"name": "두 소인수분해꼴의 공약수", "children": []}, {"name": "세 소인수분해꼴의 공약수", "children": []}]}]}, {"name": "1-5. 최소공배수", "children": [{"name": "① 최소공배수의 성질", "children": [{"name": "두 수의 최소공배수", "children": []}, {"name": "세 수의 최소공배수", "children": []}]}, {"name": "② 공배수와 최소공배수(1) 최소공배수가 주어진 경우", "children": [{"name": "두 수의 최소공배수", "children": []}, {"name": "소인수분해꼴의 두 수의 최소공배수", "children": []}, {"name": "세 수의 최소공배수", "children": []}, {"name": "소인수분해꼴의 세 수의 최소공배수", "children": []}]}, {"name": "③ 최소공배수 구하기-소인수분해를 이용하는 방법", "children": [{"name": "두 수의 최소공배수", "children": []}, {"name": "소인수분해꼴의 두 수의 최소공배수", "children": []}, {"name": "세 수의 최소공배수", "children": []}, {"name": "소인수분해꼴의 세 수의 최소공배수", "children": []}]}, {"name": "④ 최소공배수 구하기-공약수로 나누어 구하는 방법", "children": [{"name": "두 수의 최소공배수", "children": []}, {"name": "세 수의 최소공배수", "children": []}]}, {"name": "⑤ 공배수와 최소공배수(2)", "children": [{"name": "두 수의 최소공배수", "children": []}, {"name": "세 수의 최소공배수", "children": []}]}, {"name": "⑥ 최대공약수와 최소공배수의 성질", "children": [{"name": "주어진 수에 대한 성질", "children": []}, {"name": "최대공약수와 최소공배수의 성질", "children": []}]}, {"name": "⑦ 최대공약수가 주어질 때, 밑과 지수 구하기", "children": [{"name": "최대공약수가 주어지고 두 수에 대한", "children": []}, {"name": "최대공약수가 주어지고 세 수에 대한", "children": []}, {"name": "최대공약수에도 미지수가 포함되고, 세 수에 대한 경우", "children": []}]}, {"name": "⑧ 최소공배수가 주어질 때, 밑과 지수 구하기", "children": [{"name": "최소공배수가 주어지고 두 수에 대한 경우", "children": []}, {"name": "최소공배수가 주어지고 세 수에 대한 경우", "children": []}, {"name": "최소공배수에도 미지수가 포함되고, 두 수에 대한 경우", "children": []}, {"name": "최소공배수에도 미지수가 포함되고, 세 수에 대한 경우", "children": []}]}, {"name": "⑨ 최대공약수와 최소공배수가 모두 주어질 때, 밑과 지수 구하기", "children": [{"name": "두 수에 대한 경우", "children": []}, {"name": "세 수에 대한 경우", "children": []}, {"name": "최대공약수나 최소공배수에도 미지수가 포함되고, 두 수에 대한 경우", "children": []}, {"name": "최대공약수나 최소공배수에도 미지수가 포함되고, 세 수에 대한 경우", "children": []}]}, {"name": "⑩ 미지수가 포함된 수들의 최소공배수", "children": [{"name": "mⅹa 꼴로 주어진 두 수에 대한 최소공배수", "children": []}, {"name": "mⅹa 꼴로 주어진 세 수 이상의 수에 대한 최소공배수", "children": []}, {"name": "비가 주어진 수들에 대한 최소공배수", "children": []}]}, {"name": "⑪ 최대공약수가 주어질 때, 어떤 수 구하기", "children": [{"name": "두 수에 대한 경우", "children": []}, {"name": "세 수에 대한 경우", "children": []}]}, {"name": "⑫ 최소공배수가 주어질 때, 어떤 수 구하기", "children": [{"name": "두 수에 대한 경우", "children": []}, {"name": "세 수 이상의 수에 대한 경우", "children": []}]}, {"name": "⑬ 주어진 범위에서 약수와 배수의 개수", "children": [{"name": "주어진 범위에서 배수의 개수", "children": []}]}, {"name": "⑭ 어떤 자연수로 나누기", "children": [{"name": "두 수에 대한 경우", "children": []}, {"name": "세 수에 대한 경우", "children": []}]}, {"name": "⑮ 어떤 자연수를 나누기", "children": [{"name": "두 수에 대하여 나누어떨어지는 경우", "children": []}, {"name": "두 수에 대하여 남거나 모자란 경우", "children": []}, {"name": "세 수에 대하여 나누어떨어지는 경우", "children": []}, {"name": "세 수에 대하여 같은 수가 남거나 모자란 경우", "children": []}, {"name": "세 수에 대하여 남거나 모자란 경우", "children": []}]}, {"name": "⑯ 분수를 자연수로 만들기(1) {A/n}, {B/n}의 꼴", "children": [{"name": "두 분수에 대한 경우", "children": []}, {"name": "세 분수에 대한 경우", "children": []}]}, {"name": "⑰ 분수를 자연수로 만들기(2) {n/A}, {n/B}의 꼴", "children": [{"name": "두 분수에 대한 경우", "children": []}, {"name": "세 분수에 대한 경우", "children": []}]}, {"name": "⑱ 분수를 자연수로 만들기(2) {A/B}, {C/D}의 꼴", "children": [{"name": "두 분수에 대한 경우", "children": []}, {"name": "세 분수에 대한 경우", "children": []}]}, {"name": "⑲ 최대공약수의 실생활 문제(1) 일정한 양을 가능한 한 많은 사람에게 나누어 주기", "children": [{"name": "두 물건을 나누는 경우", "children": []}, {"name": "세 물건을 나누는 경우", "children": []}, {"name": "남,여학생의 조 편성", "children": []}, {"name": "나눈 두 물건이 남거나 모자란 경우", "children": []}, {"name": "나눈 세 물건이 남거나 모자란 경우", "children": []}]}, {"name": "⑳ 최대공약수의 실생활 문제(2) 직사각형, 직육면체 채우기", "children": [{"name": "직사각형", "children": []}, {"name": "직육면체", "children": []}]}, {"name": "㉑ 최대공약수의 실생활 문제(3) 일정한 간격으로 놓기", "children": [{"name": "삼각형", "children": []}, {"name": "직사각형", "children": []}, {"name": "직선의 길", "children": []}]}, {"name": "㉒ 최소공배수의 실생활 문제(1) 과부족에 대한 문제", "children": [{"name": "두 수에 대하여 나누어떨어지는 경우", "children": []}, {"name": "두 수에 대하여 남거나 모자란 경우", "children": []}, {"name": "세 수에 대하여 남거나 모자란 경우", "children": []}, {"name": "세 수에 대하여 같은 수가 남거나 모자란 경우", "children": []}]}, {"name": "㉓ 최소공배수의 실생활 문제(2) 동시에 출발하여 다시 만나는 경우", "children": [{"name": "두 사람의 바퀴 수", "children": []}, {"name": "세 사람의 바퀴 수", "children": []}, {"name": "두 시간, 날짜, 간격", "children": []}, {"name": "세 시간, 날짜, 간격", "children": []}]}, {"name": "㉔ 최소공배수의 실생활 문제(3) 맞물려 도는 톱니바퀴", "children": [{"name": "톱니의 개수", "children": []}, {"name": "회전수 구하기", "children": []}, {"name": "응용", "children": []}]}, {"name": "㉕ 최소공배수의 실생활 문제(4) 정사각형, 정육면체 만들기", "children": [{"name": "정사각형", "children": []}, {"name": "정육면체", "children": []}]}, {"name": "㉖ 최대공약수와 최소공배수의 관계를 이용하여 수 구하기", "children": [{"name": "두 수에 대한 경우", "children": []}, {"name": "세 수에 대한 경우", "children": []}]}, {"name": "㉗ (두 수의 곱)=(최대공약수)ⅹ(최소공배수)", "children": [{"name": "두 수의 곱 구하기", "children": []}, {"name": "곱과 최대공약수가 주어진 경우", "children": []}, {"name": "곱과 최소공배수가 주어진 경우", "children": []}]}]}]}, {"name": "2. 정수와 유리수", "children": [{"name": "2-1. 정수와 유리수의 뜻", "children": [{"name": "① 양의 부호와 음의 부호", "children": [{"name": "양수와 음수 판별하기", "children": []}, {"name": "양의 부호와 음의 부호를 이용하여 나타내기", "children": []}, {"name": "양의 부호와 음의 부호의 성질", "children": []}]}, {"name": "② 정수의 분류", "children": [{"name": "정수의 판단", "children": []}, {"name": "양의 정수와 음의 정수", "children": []}]}, {"name": "③ 유리수의 분류", "children": [{"name": "유리수의 판단", "children": []}, {"name": "양의 유리수와 음의 유리수", "children": []}, {"name": "정수가 아닌 유리수", "children": []}]}, {"name": "④ 정수와 유리수의 성질", "children": [{"name": "정수와 유리수에 대한 판단", "children": []}]}, {"name": "⑤ 수를 수직선 위에 나타내기", "children": [{"name": "수직선 위에 나타내기", "children": []}, {"name": "수직선 위에서의 순서", "children": []}, {"name": "수직선 위의 수에 대한 설명 판단", "children": []}]}, {"name": "⑥ 수직선을 이용하여 정수 찾기", "children": [{"name": "정수 찾기의 응용", "children": []}]}, {"name": "⑦ 수직선에서 같은 거리에 있는 점", "children": [{"name": "한 수에 대한 경우", "children": []}, {"name": "두 수에 대한 경우", "children": []}, {"name": "세 개 이상의 수에 대한 경우", "children": []}]}]}, {"name": "2-2. 정수와 유리수의 관계", "children": [{"name": "① 절댓값", "children": [{"name": "정수의 절댓값", "children": []}, {"name": "분수, 소수의 절댓값", "children": []}, {"name": "절댓값의 응용", "children": []}]}, {"name": "② 절댓값을 이용하여 수 찾기", "children": [{"name": "하나의 수를 구하는 경우", "children": []}, {"name": "두 개 이상의 수를 구하는 경우", "children": []}]}, {"name": "③ 절댓값의 성질", "children": [{"name": "절댓값의 성질", "children": []}]}, {"name": "④ 절댓값이 같고 부호가 반대인 두 수(1)", "children": [{"name": "두 점의 거리가 주어진 경우", "children": []}, {"name": "두 점의 한가운데의 점이 주어진 경우", "children": []}, {"name": "절댓값의 합이 주어진 경우", "children": []}, {"name": "0과의 거리가 주어진 경우", "children": []}, {"name": "응용", "children": []}]}, {"name": "⑤ 절댓값의 대소 관계", "children": [{"name": "대소관계 비교", "children": []}, {"name": "차례로 나열하기", "children": []}, {"name": "수직선 위의 점이 나타내는 수의 절댓값", "children": []}, {"name": "응용", "children": []}]}, {"name": "⑥ 새로운 기호를 사용하여 약속한 연산에서 절댓값의 대소 관계", "children": [{"name": "하나의 연산이 정의된 경우", "children": []}, {"name": "두 개 이상의 연산이 정의된 경우", "children": []}]}, {"name": "⑦ 절댓값의 범위가 주어진 수", "children": [{"name": "절댓값의 범위가 주어진 수", "children": []}, {"name": "절댓값의 범위에 분수, 소수가 포함된 경우", "children": []}, {"name": "절댓값의 범위가 주어진 수 응용", "children": []}]}, {"name": "⑧ 수의 대소 관계", "children": [{"name": "두 수의 대소를 비교하여 부등호 고르기", "children": []}, {"name": "두 수의 대소 관계의 응용", "children": []}, {"name": "세 개 이상의 수의 대소 관계 파악", "children": []}, {"name": "조건을 만족하는 세 개 이상의 수들의 대소관계", "children": []}, {"name": "세 개 이상의 수의 대소관계의 응용", "children": []}]}, {"name": "⑨ 절댓값이 같고 부호가 반대인 두 수(2)", "children": [{"name": "두 수의 대소 관계가 주어진 경우", "children": []}, {"name": "두 수의 차가 주어진 경우", "children": []}, {"name": "두 수 중 큰/작은 수를 구하는 경우", "children": []}]}, {"name": "⑩ 두 수의 절댓값 사이의 관계가 주어진 경우", "children": [{"name": "절댓값이 주어진 경우", "children": []}, {"name": "절댓값의 차이가 주어진 경우", "children": []}, {"name": "절댓값의 연산이 주어진 경우", "children": []}]}, {"name": "⑪ 부등호를 사용하여 나타내기", "children": [{"name": "이상,이하,미만,초과의 사용", "children": []}, {"name": "크다, 작다의 사용", "children": []}, {"name": "응용", "children": []}]}, {"name": "⑫ 주어진 범위에 속하는 수", "children": [{"name": "주어진 범위에 속하는 수", "children": []}, {"name": "절댓값의 범위가 주어진 경우", "children": []}, {"name": "주어진 범위에 속하는 수의 응용", "children": []}, {"name": "두 수 사이의 기약분수", "children": []}]}, {"name": "⑬ 문자로 나타낸 수의 대소 관계", "children": [{"name": "문자로 주어진 두 수의 대소 관계", "children": []}, {"name": "문자로 주어진 세 수의 대소 관계", "children": []}, {"name": "문자로 주어진 네 개 이상의 수의 대소 관계", "children": []}, {"name": "문자로 주어진 수의 양수, 음수 판별하기", "children": []}]}]}, {"name": "2-3. 정수와 유리수의 덧셈과 뺄셈", "children": [{"name": "① 정수의 덧셈", "children": [{"name": "정수의 덧셈 계산", "children": []}, {"name": "정수의 덧셈 응용", "children": []}, {"name": "정수의 덧셈 활용", "children": []}]}, {"name": "② 유리수의 덧셈", "children": [{"name": "소수의 덧셈", "children": []}, {"name": "분수의 덧셈", "children": []}, {"name": "소수와 분수의 덧셈", "children": []}, {"name": "유리수의 덧셈 응용", "children": []}]}, {"name": "③ 수직선을 이용한 유리수의 덧셈두 유리수의 덧셈", "children": [{"name": "두 유리수의 덧셈", "children": []}]}, {"name": "④ 덧셈의 계산 법칙", "children": [{"name": "교환법칙", "children": []}, {"name": "결합법칙", "children": []}, {"name": "계산법칙의 사용", "children": []}]}, {"name": "⑤ 덧셈의 계산 법칙을 이용하여 계산하기", "children": [{"name": "세 유리수의 덧셈", "children": []}, {"name": "네 개 이상의 유리수의 덧셈", "children": []}, {"name": "덧셈의 계산 법칙의 응용", "children": []}]}, {"name": "⑥ 유리수의 뺄셈", "children": [{"name": "정수의 뺄셈", "children": []}, {"name": "분수의 뺄셈", "children": []}, {"name": "소수의 뺄셈", "children": []}, {"name": "정수, 분수, 소수의 뺄셈", "children": []}, {"name": "유리수의 뺄셈 응용", "children": []}]}, {"name": "⑦ 수직선으로 설명하는 덧셈과 뺄셈", "children": [{"name": "수직선으로 설명하는 덧셈과 뺄셈", "children": []}, {"name": "수직선으로 설명하는 덧셈과 뺄셈 응용", "children": []}]}, {"name": "⑧ 덧셈과 뺄셈의 혼합 계산(1) 부호가 있는 경우", "children": [{"name": "정수의 혼합계산", "children": []}, {"name": "소수의 혼합계산", "children": []}, {"name": "분수의 혼합계산", "children": []}, {"name": "정수,소수,분수의 혼합계산", "children": []}]}, {"name": "⑨ 덧셈과 뺄셈의 혼합 계산(2) 부호가 생략된 경우", "children": [{"name": "정수의 혼합계산", "children": []}, {"name": "소수의 혼합계산", "children": []}, {"name": "분수의 혼합계산", "children": []}, {"name": "정수,소수,분수의 혼합계산", "children": []}]}]}, {"name": "2-4. 정수와 유리수의 덧셈과 뺄셈의 활용", "children": [{"name": "① 어떤 수보다 □만큼 큰(작은) 수", "children": [{"name": "조건이 정수로 이루어진 경우", "children": []}, {"name": "조건이 분수로 이루어진 경우", "children": []}, {"name": "조건이 소수로 이루어진 경우", "children": []}, {"name": "분수와 소수가 조건에 포함되는 경우", "children": []}]}, {"name": "② 어떤 수 구하기; 덧셈과 뺄셈", "children": [{"name": "식으로 주어진 경우", "children": []}, {"name": "식으로 주어진 경우(여러 개 구하기)", "children": []}, {"name": "식으로 주어지지 않은 경우", "children": []}]}, {"name": "③ 바르게 계산한 답 구하기; 덧셈과 뺄셈", "children": [{"name": "어떤 수에 잘못 계산한 경우", "children": []}, {"name": "어떤 수를 잘못 계산한 경우", "children": []}, {"name": "다른 수로 잘못 계산한 경우", "children": []}]}, {"name": "④ 절댓값이 주어진 두 수의 덧셈과 뺄셈", "children": [{"name": "절댓값이 정수로 주어진 경우", "children": []}, {"name": "절댓값이 분수로 주어진 경우", "children": []}, {"name": "절댓값의 조건이 주어진 경우", "children": []}]}, {"name": "⑤ 유리수의 덧셈과 뺄셈의 활용(1) 수직선", "children": [{"name": "수직선 위의 점 구하기", "children": []}, {"name": "거리가 주어진 경우", "children": []}, {"name": "거리를 구하는 경우", "children": []}]}, {"name": "⑥ 유리수의 덧셈과 뺄셈의 활용(2) 규칙이 있는 경우", "children": [{"name": "삼각형", "children": []}, {"name": "사각형", "children": []}, {"name": "정육면체", "children": []}, {"name": "마방진", "children": []}, {"name": "수의 나열", "children": []}, {"name": "피라미드 형태", "children": []}]}, {"name": "⑦ 유리수의 덧셈과 뺄셈의 활용(3) 실생활", "children": [{"name": "일교차", "children": []}, {"name": "시간별 수치의 변화", "children": []}, {"name": "높이(키)의 비교", "children": []}, {"name": "나라별 시차", "children": []}, {"name": "물건의 위치", "children": []}]}]}, {"name": "2-5. 정수와 유리수의 곱셈", "children": [{"name": "① 유리수의 곱셈", "children": [{"name": "정수의 곱셈", "children": []}, {"name": "분수의 곱셈", "children": []}, {"name": "소수의 곱셈", "children": []}, {"name": "정수, 분수, 소수의 곱셈", "children": []}, {"name": "유리수의 곱셈의 응용", "children": []}, {"name": "규칙을 가진 곱셈식", "children": []}]}, {"name": "② 곱셈의 계산 법칙", "children": [{"name": "사용된 계산 법칙 구하기", "children": []}, {"name": "계산 법칙이 사용된 곳 찾기", "children": []}]}, {"name": "③ 곱셈의 계산 법칙을 이용하여 계산하기", "children": [{"name": "곱셈 계산하기", "children": []}, {"name": "곱셈 계산 과정 완성하기", "children": []}]}, {"name": "④ 곱이 가장 큰 (작은) 수 만들기", "children": [{"name": "정수만 주어진 경우", "children": []}, {"name": "정수,분수,소수가 주어진 경우", "children": []}, {"name": "응용", "children": []}]}, {"name": "⑤ 거듭제곱의 계산", "children": [{"name": "정수의 거듭제곱", "children": []}, {"name": "유리수의 거듭제곱", "children": []}, {"name": "정수의 거듭제곱의 연산", "children": []}, {"name": "유리수의 거듭제곱의 연산", "children": []}]}, {"name": "⑥ (-1)ⁿ의 계산", "children": [{"name": "(-1)ⁿ의 계산", "children": []}, {"name": "(-1)ⁿ꼴이 포함된 연산", "children": []}, {"name": "응용", "children": []}, {"name": "지수의 미지수 조건이 주어진 경우", "children": []}]}, {"name": "⑦ 분배법칙", "children": [{"name": "분배법칙", "children": []}, {"name": "계산법칙", "children": []}]}, {"name": "⑧ 분배법칙을 이용하여 계산하기", "children": [{"name": "전개가 필요한 계산", "children": []}, {"name": "공통부분으로 묶는 계산", "children": []}, {"name": "분배법칙의 응용", "children": []}]}, {"name": "⑨ 역수", "children": [{"name": "역수 구하기", "children": []}, {"name": "역수의 응용", "children": []}, {"name": "전개도", "children": []}]}]}, {"name": "2-6. 정수와 유리수의 나눗셈", "children": [{"name": "① 유리수의 나눗셈", "children": [{"name": "정수의 나눗셈", "children": []}, {"name": "분수의 나눗셈", "children": []}, {"name": "소수의 나눗셈", "children": []}, {"name": "정수,분수,소수의 나눗셈", "children": []}, {"name": "유리수의 나눗셈 응용", "children": []}, {"name": "유리수의 사칙연산", "children": []}]}, {"name": "② 곱셈과 나눗셈 사이의 관계", "children": [{"name": "하나의 수를 구하는 경우", "children": []}, {"name": "두 개의 수를 구하는 경우", "children": []}, {"name": "세 개 이상의 수를 구하는 경우", "children": []}]}, {"name": "③ 어떤 수 구하기; 곱셈, 나눗셈", "children": [{"name": "잘못 계산한 경우", "children": []}, {"name": "두 수의 연산 조건이 주어진 경우", "children": []}]}, {"name": "④ 바르게 계산한 답 구하기; 곱셈, 나눗셈", "children": [{"name": "계산을 잘못한 경우", "children": []}, {"name": "다른 수로 계산한 경우", "children": []}]}, {"name": "⑤ 문자로 주어진 수의 부호(1)", "children": [{"name": "한 문자에 대한 경우", "children": []}, {"name": "두 문자에 대한 경우", "children": []}, {"name": "세 문자 이상에 대한 경우", "children": []}]}, {"name": "⑥ 문자로 주어진 수의 부호(2)", "children": [{"name": "두 문자에 대한 경우", "children": []}, {"name": "세 문자에 대한 경우", "children": []}, {"name": "네 문자 이상에 대한 경우", "children": []}]}, {"name": "⑦ 곱셈과 나눗셈의 혼합 계산", "children": [{"name": "세 수의 혼합 계산", "children": []}, {"name": "네 개 이상의 수의 혼한 계산", "children": []}, {"name": "거듭제곱이 포함된 혼합 계산", "children": []}, {"name": "혼합 계산의 응용", "children": []}, {"name": "빈 칸이 포함된 혼합 계산", "children": []}]}]}, {"name": "2-7. 덧셈, 뺄셈, 곱셈, 나눗셈의 혼합 계산", "children": [{"name": "① 덧셈, 뺄셈, 곱셈, 나눗셈의 혼합 계산 순서와 계산 법칙", "children": [{"name": "계산 순서 나열", "children": []}, {"name": "응용", "children": []}, {"name": "계산 법칙", "children": []}]}, {"name": "② 덧셈, 뺄셈, 곱셈, 나눗셈의 혼합 계산", "children": [{"name": "혼합 계산", "children": []}, {"name": "중(소)괄호가 포함된 경우", "children": []}, {"name": "대괄호가 포함된 경우", "children": []}, {"name": "거듭제곱이 포함된 경우", "children": []}, {"name": "중(소)괄호와 거듭제곱이 포함된 경우", "children": []}, {"name": "대괄호와 거듭제곱이 포함된 경우", "children": []}, {"name": "혼합 계산의 응용", "children": []}, {"name": "혼합 계산의 활용", "children": []}]}, {"name": "③ 새로운 연산 기호의 계산", "children": [{"name": "하나의 연산을 정의한 경우", "children": []}, {"name": "두 개이상의 연산을 정의한 경우", "children": []}]}, {"name": "④ 문자로 주어진 수의 대소 관계", "children": [{"name": "한 문자에 대한 경우", "children": []}, {"name": "두 개 이상의 문자에 대한 경우", "children": []}]}, {"name": "⑤ 유리수의 혼합 계산의 활용(1) 수직선", "children": [{"name": "같은 거리에 있는 경우", "children": []}, {"name": "등분한 경우", "children": []}, {"name": "거리 비가 주어진 경우", "children": []}]}, {"name": "⑥ 유리수의 혼합 계산의 활용(2) 실생활", "children": [{"name": "가위바위보", "children": []}, {"name": "문제의 정오답", "children": []}, {"name": "도형", "children": []}, {"name": "동전, 주사위 이용", "children": []}]}]}]}]}, {"name": "Ⅱ. 문자와 식", "children": [{"name": "1. 문자의 사용과 식", "children": [{"name": "1-1. 문자의 사용", "children": [{"name": "① 곱셈 기호의 생략", "children": [{"name": "곱셈 기호를 생략하여 나타내기: 문자와 숫자의 곱", "children": []}, {"name": "곱셈 기호를 사용하여 나타내기", "children": []}, {"name": "곱셈 기호를 생략하여 나타내기: 빈칸 채우기", "children": []}, {"name": "곱셈 기호를 생략하여 나타내기: 옳은/옳지 않은 것 고르기", "children": []}]}, {"name": "② 나눗셈 기호의 생략", "children": [{"name": "나눗셈 기호를 생략하여 나타내기", "children": []}, {"name": "나눗셈 기호를 사용하여 나타내기", "children": []}]}, {"name": "③ 곱셈과 나눗셈이 혼합된 경우의 기호의 생략", "children": [{"name": "곱셈, 나눗셈 기호를 생략하여 나타내기", "children": []}, {"name": "곱셈, 나눗셈 기호를 생략한 식의 다른 식과의 비교", "children": []}, {"name": "곱셈, 나눗셈 기호를 사용하여 나타내기", "children": []}]}, {"name": "④ 문자를 사용하여 식으로 나타내기", "children": [{"name": "문자 1개, 항 1개", "children": []}, {"name": "문자 1개, 항 2개 이상", "children": []}, {"name": "문자 2개 이상", "children": []}]}, {"name": "⑤ 문자를 사용한 식(1) 비율, 단위, 수", "children": [{"name": "식으로의 표현: 수", "children": []}, {"name": "식으로의 표현: 비율", "children": []}, {"name": "식으로의 표현: 단위", "children": []}]}, {"name": "⑥ 문자를 사용한 식(2) 도형의 둘레의 길이, 넓이, 부피", "children": [{"name": "다각형의 둘레 또는 한 변의 길이", "children": []}, {"name": "다각형의 넓이", "children": []}, {"name": "입체도형의 겉넓이 또는 부피", "children": []}, {"name": "성냥개비를 이용한 도형", "children": []}, {"name": "(종합) 주어진 문장을 식으로 나타내기", "children": []}, {"name": "선분의 길이", "children": []}]}, {"name": "⑦ 문자를 사용한 식(3) 가격", "children": [{"name": "가격을 식으로 나타내기: 문자 1개", "children": []}, {"name": "가격을 식으로 나타내기: 문자 2개 이상", "children": []}, {"name": "거스름돈을 식으로 나타내기: 문자 1개", "children": []}, {"name": "거스름돈을 식으로 나타내기: 문자 2개 이상", "children": []}, {"name": "(종합) 가격, 거스름돈의 식으로의 표현", "children": []}, {"name": "두 개의 가격 비교", "children": []}]}, {"name": "⑧ 문자를 사용한 식(4) 거리, 속력, 시간", "children": [{"name": "(기본) 시간, 속력, 거리의 식으로의 표현", "children": []}, {"name": "시간, 속력, 거리의 식으로의 표현: 휴식을 포함하는 경우", "children": []}, {"name": "시간, 속력, 거리의 식으로의 표현: 기차가 다리를 통과하는 경우", "children": []}]}, {"name": "⑨ 문자를 사용한 식(5) 농도", "children": [{"name": "소금의 양의 식으로의 표현", "children": []}, {"name": "소금물의 농도의 식으로의 표현", "children": []}]}, {"name": "⑩ 문자를 사용한 식(6) 종합", "children": [{"name": "(종합) 식으로의 표현", "children": []}]}]}, {"name": "1-2. 식의 값 구하기", "children": [{"name": "① 식의 값(1)", "children": [{"name": "식의 값 구하기", "children": []}, {"name": "식의 값의 대소 비교", "children": []}, {"name": "같은/다른 값을 갖는 식 찾기", "children": []}, {"name": "식의 값을 구하는 과정의 빈칸 채우기", "children": []}]}, {"name": "② 식의 값(2)", "children": [{"name": "식의 값 구하기: x,y의 값이 주어진 경우", "children": []}, {"name": "식의 값의 비교", "children": []}, {"name": "식의 값 구하기: 식에 절댓값을 포함한 경우", "children": []}, {"name": "식의 값 구하기: x,y의 조건이 주어진 경우", "children": []}]}]}, {"name": "1-3. 일차식과 곱셈과 나눗셈", "children": [{"name": "① 다항식", "children": [{"name": "다항식의 요소: 항, 항의 계수, 차수, 상수항 등", "children": []}, {"name": "단항식과 다항식의 판단", "children": []}, {"name": "다항식의 요소의 연산", "children": []}]}, {"name": "② 일차식", "children": [{"name": "일차식 판단", "children": []}, {"name": "다항식의 요소", "children": []}]}, {"name": "③ (일차식)×(수), (일차식)÷(수)", "children": [{"name": "(단항식)×(수) 계산", "children": []}, {"name": "(다항식)×(수) 계산", "children": []}, {"name": "(단항식)÷(수) 계산", "children": []}, {"name": "(다항식)÷(수) 계산", "children": []}, {"name": "(종합) (다항식)×(수) 또는 (다항식)÷(수)", "children": []}]}, {"name": "④ (일차식)×(수), (일차식)÷(수)의 활용", "children": [{"name": "도형의 넓이 나타내기", "children": []}, {"name": "도형을 겹쳐 붙인 경우", "children": []}]}]}, {"name": "1-4. 일차식의 덧셈과 뺄셈", "children": [{"name": "① 동류항", "children": [{"name": "동류항 판단", "children": []}, {"name": "동류항의 정의", "children": []}, {"name": "(종합) 다항식의 요소", "children": []}]}, {"name": "② 일차식의 덧셈과 뺄셈", "children": [{"name": "동류항의 덧셈과 뺄셈: 문자 1개, 항 2개", "children": []}, {"name": "동류항의 덧셈과 뺄셈: 문자 1개, 항 3개 이상", "children": []}, {"name": "동류항의 덧셈과 뺄셈의 계산 과정", "children": []}, {"name": "괄호가 없는 일차식의 덧셈과 뺄셈", "children": []}, {"name": "괄호를 포함한 일차식의 덧셈과 뺄셈", "children": []}, {"name": "일차식의 덧셈과 뺄셈을 이용한 식의 값", "children": []}]}, {"name": "③ 분수 꼴인 일차식의 덧셈과 뺄셈", "children": [{"name": "분수 꼴인 일차식의 덧셈과 뺄셈: 문자 1개", "children": []}, {"name": "분수 꼴인 일차식의 덧셈과 뺄셈: 문자 2개", "children": []}]}, {"name": "④ 여러 가지 일차식의 덧셈과 뺄셈", "children": [{"name": "일차식의 덧셈과 뺄셈 계산: 문자 1개", "children": []}, {"name": "일차식의 덧셈과 뺄셈 계산: 문자 2개", "children": []}, {"name": "일차항의 계수가 주어지고 상수항이 주어지지 않은 일차식의 덧셈과 뺄셈", "children": []}, {"name": "(종합) 일차식 계산", "children": []}]}, {"name": "⑤ 일차식 계산과 계수, 상수항", "children": [{"name": "일차식의 특정 계수(상수항) 구하기 또는 그 연산", "children": []}, {"name": "식이 2개 이상 주어지는 경우", "children": []}, {"name": "일차식의 특정 계수(상수항)가 주어지는 경우", "children": []}]}, {"name": "⑥ 일차식이 되기 위한 조건", "children": [{"name": "일차식이 되기 위한 조건: 미지수 1개", "children": []}, {"name": "일차식이 되기 위한 조건: 미지수 2개", "children": []}]}, {"name": "⑦ 문자에 일차식을 대입하기", "children": [{"name": "문자에의 일차식의 대입: 문자 1개에 대한 일차식", "children": []}, {"name": "문자에의 일차식의 대입: 문자 2개에 대한 일차식", "children": []}, {"name": "문자에의 일차식의 대입과 연산: 문자 1개에 대한 일차식", "children": []}, {"name": "문자에의 일차식의 대입과 연산: 문자 2개에 대한 일차식", "children": []}, {"name": "새로운 기호의 이용", "children": []}]}, {"name": "⑧ 어떤 식 구하기", "children": [{"name": "어떤 식 구하기: 식이 주어지는 경우, 다항식 1개", "children": []}, {"name": "어떤 식 구하기: 줄글이 주어지는 경우, 다항식 1개", "children": []}, {"name": "어떤 식 구하기: 식이 주어지는 경우, 다항식 2개 이상", "children": []}, {"name": "어떤 식 구하기: 표 또는 그림이 주어지는 경우", "children": []}, {"name": "어떤 식 구하기: 잘못 계산한 경우", "children": []}, {"name": "어떤 식 구하기: 줄글이 주어지는 경우, 다항식 2개 이상", "children": []}]}, {"name": "⑨ 바르게 계산한 식 구하기", "children": [{"name": "바르게 계산한 식 구하기", "children": []}, {"name": "바르게 계산한 식에서의 연산", "children": []}]}, {"name": "⑩ (-1)ⁿ의 꼴이 포함된 일차식의 계산", "children": [{"name": "x에 대한 일차식", "children": []}, {"name": "x,y에 대한 일차식", "children": []}]}, {"name": "⑪ 일차식의 덧셈과 뺄셈의 활용", "children": [{"name": "도형의 넓이, 겉넓이 (도형의 둘레의 길이와 넓이를 함께 구하는 경우 포함)", "children": []}, {"name": "도형의 한 변의 길이, 둘레의 길이", "children": []}, {"name": "가격, 점수", "children": []}, {"name": "사람의 수", "children": []}, {"name": "거리, 속력, 시간", "children": []}, {"name": "여러 수 사이의 관계", "children": []}]}]}]}, {"name": "2. 일차방정식", "children": [{"name": "2-1. 방정식과 그 해", "children": [{"name": "① 등식", "children": [{"name": "등식의 판단", "children": []}, {"name": "등식의 좌변과 우변", "children": []}, {"name": "(종합) 등식에 대한 설명", "children": []}]}, {"name": "② 문장을 등식으로 나타내기", "children": [{"name": "문장을 등식으로 나타내기: 문자 1개", "children": []}, {"name": "문장을 등식으로 나타내기: 문자 2개", "children": []}, {"name": "(종합) 문장을 등식으로 나타내기", "children": []}]}, {"name": "③ 방정식과 방정식의 해", "children": [{"name": "방정식의 해 구하기: 해가 숫자로 주어진 경우", "children": []}, {"name": "방정식의 해 구하기: 해가 조건으로 주어진 경우", "children": []}]}, {"name": "④ 항등식", "children": [{"name": "항등식의 판단", "children": []}, {"name": "항등식의 판단의 활용", "children": []}]}, {"name": "⑤ 항등식이 되는 조건", "children": [{"name": "항등식이 되는 조건: 미지수 1개", "children": []}, {"name": "항등식이 되는 조건: 미지수 2개", "children": []}, {"name": "항등식이 되는 조건: 식 구하기", "children": []}]}, {"name": "⑥ 등식의 성질", "children": [{"name": "등식의 빈칸 채우기", "children": []}, {"name": "등식의 참/거짓 판단", "children": []}, {"name": "등식의 성질을 이용한 값 구하기", "children": []}, {"name": "등식의 성질의 활용", "children": []}]}, {"name": "⑦ 등식의 성질을 이용한 방정식의 풀이", "children": [{"name": "방정식의 풀이 과정", "children": []}, {"name": "방정식 풀기", "children": []}, {"name": "방정식의 풀이에서 사용되는 등식의 성질", "children": []}, {"name": "등식의 성질을 이용한 무게 비교", "children": []}]}, {"name": "⑧ 이항", "children": [{"name": "이항하기", "children": []}, {"name": "이항하여 정리하기", "children": []}]}]}, {"name": "2-2. 일차방정식의 풀이", "children": [{"name": "① 일차방정식", "children": [{"name": "일차방정식의 판단", "children": []}, {"name": "일차방정식이 되기 위한 조건: 미지수 1개", "children": []}, {"name": "일차방정식이 되기 위한 조건: 미지수 2개", "children": []}, {"name": "(종합) 일차방정식에 대한 설명", "children": []}]}, {"name": "② 일차방정식의 풀이", "children": [{"name": "일차방정식의 풀이", "children": []}, {"name": "무게 비교를 통한 일차방정식의 풀이", "children": []}]}, {"name": "③ 괄호가 있는 일차방정식의 풀이", "children": [{"name": "일차방정식의 풀이", "children": []}, {"name": "여러 일차방정식의 해의 비교", "children": []}, {"name": "일차방정식의 해의 연산", "children": []}]}, {"name": "④ 계수가 소수인 일차방정식의 풀이", "children": [{"name": "일차방정식의 풀이", "children": []}, {"name": "일차방정식의 풀이 과정", "children": []}, {"name": "계수가 소수이며 괄호를 포함한 일차방정식", "children": []}]}, {"name": "⑤ 계수가 분수인 일차방정식의 풀이", "children": [{"name": "일차방정식의 풀이", "children": []}, {"name": "일차방정식의 풀이 과정", "children": []}, {"name": "식의 해를 이용한 일차방정식의 풀이", "children": []}, {"name": "계수가 분수이며 괄호를 포함한 일차방정식", "children": []}]}]}, {"name": "2-3. 여러 가지 일차방정식 풀이하기", "children": [{"name": "① 여러 가지 일차방정식의 풀이", "children": [{"name": "계수에 분수와 소수를 포함한 일차방정식: 일차방정식 1개", "children": []}, {"name": "계수에 분수와 소수를 포함한 일차방정식: 일차방정식 2개", "children": []}, {"name": "새로운 기호를 이용한 일차방정식의 풀이", "children": []}, {"name": "그림 또는 표를 이용한 일차방정식의 풀이", "children": []}, {"name": "절댓값을 포함한 일차방정식의 풀이", "children": []}, {"name": "일차방정식의 해의 비교", "children": []}, {"name": "(종합) 일차방정식에 대한 설명", "children": []}]}, {"name": "② 비례식으로 주어진 일차방정식의 풀이", "children": [{"name": "일차방정식의 풀이", "children": []}, {"name": "일차방정식의 풀이와 연산", "children": []}]}, {"name": "③ 일차방정식의 해가 주어진 경우", "children": [{"name": "해가 주어진 일차방정식의 미지수 구하기", "children": []}, {"name": "두 일차방정식의 해가 주어진 경우", "children": []}, {"name": "일차방정식의 미지수를 이용한 다른 일차방정식의 풀이", "children": []}, {"name": "일차방정식을 잘못 보고 푼 경우", "children": []}]}]}, {"name": "2-4. 여러 가지 일차방정식 풀이하기", "children": [{"name": "① 해가 같은 두 일차방정식", "children": [{"name": "(기본) 해가 같은 일차방정식", "children": []}, {"name": "비례식으로 주어진 두 일차방정식의 해가 같은 경우", "children": []}, {"name": "해 사이의 관계가 주어진 두 일차방정식", "children": []}, {"name": "해의 비가 주어진 두 일차방정식", "children": []}]}, {"name": "② 특수한 해를 갖는 방정식", "children": [{"name": "해가 존재하지 않는 경우", "children": []}, {"name": "해가 무수히 많은 경우", "children": []}, {"name": "(종합) 해가 존재하지 않는 경우와 해가 무수히 많은 경우", "children": []}]}, {"name": "③ 해에 대한 조건이 주어진 방정식", "children": [{"name": "해의 조건을 만족하는 미지수의 값", "children": []}, {"name": "해의 조건을 만족하는 미지수의 값의 합/개수", "children": []}, {"name": "해 구하기", "children": []}]}]}, {"name": "2-5. 수, 개수, 나이, 도형, 금액에 대한 일차방정식의 활용", "children": [{"name": "① 어떤 수에 대한 문제", "children": [{"name": "방정식 세우기", "children": []}, {"name": "어떤 수 구하기", "children": []}, {"name": "처음 구하려던 수 구하기", "children": []}, {"name": "실생활에의 활용", "children": []}]}, {"name": "② 연속하는 수에 대한 문제", "children": [{"name": "연속하는 두 수", "children": []}, {"name": "연속하는 세 수", "children": []}]}, {"name": "③ 자리의 숫자에 대한 문제", "children": [{"name": "두 자리 수: 십의 자리 숫자와 일의 자리 숫자를 바꾸지 않은 경우", "children": []}, {"name": "두 자리 수: 십의 자리 숫자와 일의 자리 숫자를 바꾼 경우", "children": []}, {"name": "세 자리 수", "children": []}]}, {"name": "④ 합이 일정한 경우", "children": [{"name": "개수의 합이 일정한 경우", "children": []}]}, {"name": "⑤ 옮기기와 관련된 문제", "children": [{"name": "옮겨야 하는 양 구하기", "children": []}]}, {"name": "⑥ 물건을 주고 받는 경우", "children": [{"name": "두 사람 사이의 이동", "children": []}, {"name": "세 사람 사이의 이동", "children": []}]}, {"name": "⑦ 나이에 대한 문제", "children": [{"name": "두 사람의 나이가 주어진 경우", "children": []}, {"name": "현재 기준의 두 사람의 나이의 합차가 주어진 경우", "children": []}, {"name": "현재 기준의 두 사람의 나이 사이의 배수 관계가 주어진 경우", "children": []}, {"name": "두 사람의 나이 사이의 관계가 두가지 방법으로 주어진 경우", "children": []}, {"name": "세 명 이상의 나이", "children": []}, {"name": "과거와 미래의 두 사람의 나이 사이의 관계가 주어진 경우", "children": []}]}, {"name": "⑧ 도형에 대한 문제", "children": [{"name": "평면도형의 변의 길이, 넓이", "children": []}, {"name": "입체도형", "children": []}, {"name": "두 도형의 비교", "children": []}, {"name": "평면도형의 가로, 세로의 길이의 변화", "children": []}, {"name": "도형에 길을 내는 경우", "children": []}, {"name": "점이 이동하여 만들어지는 도형", "children": []}]}, {"name": "⑨ 원가와 정가에 대한 문제", "children": [{"name": "원가와 정가: 원가에 이익을 붙인 정가에서 할인하는 경우", "children": []}, {"name": "원가와 정가: 할인하는 경우", "children": []}, {"name": "원가와 정가: 기본 요금과 초과요금", "children": []}, {"name": "원가와 정가: 이익 붙이기", "children": []}]}, {"name": "⑩ 상품 구입과 거스름돈 구하기", "children": [{"name": "상품 구입과 거스름돈/남은 돈", "children": []}, {"name": "상품 구입", "children": []}]}, {"name": "⑪ 예금에 대한 문제", "children": [{"name": "예금액이 같아지는 시점 구하기", "children": []}, {"name": "두 예금액 사이에 배수 관계가 존재하는 경우", "children": []}]}]}, {"name": "2-6. 증가, 감소, 과부족, 비율, 거리, 속력, 시간에 대한 일차방정식의 활용", "children": [{"name": "① 증가, 감소에 대한 문제", "children": [{"name": "상품 1개의 증감", "children": []}, {"name": "상품 2개의 증감", "children": []}, {"name": "학생수의 증감 비교: 식 나타내기, 빈칸 채우기", "children": []}, {"name": "학생 수의 증감 비교: 학생 수 구하기", "children": []}, {"name": "학생 수의 증감 비교: 남학생 수, 여학생 수의 비교가 주어진 경우", "children": []}]}, {"name": "② 과부족에 대한 문제(1) 긴의자, 줄세우기", "children": [{"name": "의자 수(줄의 수) 구하기", "children": []}, {"name": "사람 수 구하기", "children": []}, {"name": "의자 수(줄의 수)와 사람 수 구하기", "children": []}]}, {"name": "③ 과부족에 대한 문제(2) 금액, 물건을 나누는 경우", "children": [{"name": "과부족: 물건을 나누어주고 남는 수", "children": []}, {"name": "물건을 나누어주는 2개의 방식: 모두 받는 경우", "children": []}, {"name": "물건을 나누어주는 2개의 방식: 마지막 사람은 일부만 받는 경우", "children": []}]}, {"name": "④ 비율에 대한 문제", "children": [{"name": "비율에 대한 문제: 문자로 나타내기, 방정식 세우기", "children": []}, {"name": "비율에 대한 문제: 값 구하기", "children": []}]}, {"name": "⑤ 비에 대한 문제", "children": [{"name": "서로 주고 받거나 섞지 않는 경우", "children": []}, {"name": "서로 주고 받거나 섞는 경우", "children": []}]}, {"name": "⑥ 거리, 속력, 시간에 대한 문제(1) 총 걸린 시간이 주어진 경우", "children": [{"name": "빈칸 채우기, 방정식 세우기", "children": []}, {"name": "속력이 바뀌는 경우: 쉬는 시간 미포함", "children": []}, {"name": "속력이 바뀌는 경우: 쉬는 시간 포함", "children": []}, {"name": "강물을 거슬러 오르는 배", "children": []}]}, {"name": "⑦ 거리, 속력, 시간에 대한 문제(2) 시차를 두고 출발하는 경우", "children": [{"name": "같은 위치에서 시차를 두고 출발하는 경우", "children": []}, {"name": "다른 위치에서 시차를 두고 출발하는 경우", "children": []}]}, {"name": "⑧ 거리, 속력, 시간에 대한 문제(3) 시차가 발생하는 경우", "children": [{"name": "시차가 발생하는 경우: 쉬는 시간 미포함", "children": []}, {"name": "시차가 발생하는 경우: 쉬는 시간 포함", "children": []}]}, {"name": "⑨ 거리, 속력, 시간에 대한 문제(4) 마주 보고 걷거나 둘레를 도는 경우", "children": [{"name": "마주 보고 걷거나 둘레를 도는 경우: 두 사람이 동시에 출발", "children": []}, {"name": "마주 보고 걷거나 둘레를 도는 경우: 두 사람이 서로 다른 시각에 출발", "children": []}]}, {"name": "⑩ 거리, 속력, 시간에 대한 문제(5) 열차가 다리 또는 터널을 지나는 경우", "children": [{"name": "열차가 다리 1개를 통과하는 경우", "children": []}, {"name": "열차가 다리 2개를 통과하는 경우 또는 2개의 열차가 1개의 다리를 통과하는 경우", "children": []}, {"name": "서로 반대 방향으로 달리는 열차", "children": []}]}]}, {"name": "2-7. 농도, 일, 시계, 규칙에 대한 일차방정식의 활용", "children": [{"name": "① 소금물의 농도에 대한 문제(1) 물을 넣거나 증발시키는 경우", "children": [{"name": "물을 더 넣는 경우", "children": []}, {"name": "물을 증발시키는 경우", "children": []}, {"name": "물을 증발시키는 경우와 더 넣는 경우가 모두 있는 경우", "children": []}]}, {"name": "② 소금물의 농도에 대한 문제(2) 소금을 더 넣는 경우", "children": [{"name": "소금을 더 넣는 경우의 풀이 과정 또는 방정식 세우기", "children": []}, {"name": "물을 더 넣거나 증발시키지 않고 소금을 더 넣는 경우", "children": []}, {"name": "물과 소금을 모두 더 넣는 경우", "children": []}, {"name": "물을 증발시키고 소금을 더 넣는 경우", "children": []}]}, {"name": "③ 소금물의 농도에 대한 문제(3) 농도가 다른 두 소금물을 섞는 경우", "children": [{"name": "농도가 다른 소금물의 혼합", "children": []}, {"name": "농도가 다른 소금물의 혼합에 추가 과정이 더해진 경우", "children": []}, {"name": "두 그릇의 소금물 바꾸어 섞기", "children": []}]}, {"name": "④ 일에 대한 문제", "children": [{"name": "일에 대한 문제: 방정식 세우기", "children": []}, {"name": "일의 완성: 일하는 시간이 주어진 경우", "children": []}, {"name": "두 사람이 만든 제품의 개수 사이의 관계가 주어진 경우", "children": []}, {"name": "물통을 비우고 채우는 경우", "children": []}]}, {"name": "⑤ 시계에 대한 문제", "children": [{"name": "방정식 세우기", "children": []}, {"name": "시침과 분침이 특정 각도를 이룰 때의 시각 구하기", "children": []}, {"name": "주어진 두 시각 사이의 시간 구하기", "children": []}]}, {"name": "⑥ 규칙이 있는 수에 대한 문제", "children": [{"name": "도형이 이루는 규칙", "children": []}, {"name": "달력, 날짜, 데이터, 출력값 등이 주어진 경우", "children": []}]}]}]}]}, {"name": "Ⅲ. 좌표평면과 그래프", "children": [{"name": "1. 좌표평면과 그래프", "children": [{"name": "1-1. 순서쌍과 좌표", "children": [{"name": "① 수직선 위의 점의 좌표", "children": [{"name": "점을 수직선 위에 나타내기", "children": []}, {"name": "수직선 위의 점을 기호로 나타내기", "children": []}, {"name": "n만큼 떨어져 있는 점 구하기", "children": []}]}, {"name": "② 순서쌍", "children": [{"name": "서로 같은 두 순서쌍", "children": []}, {"name": "조건을 만족하는 순서쌍", "children": []}]}, {"name": "③ 좌표평면 위의 점의 좌표", "children": [{"name": "점을 좌표평면 위에 나타내기", "children": []}, {"name": "좌표평면 위의 점의 좌표", "children": []}, {"name": "x좌표, y좌표가 주어진 점의 기호 표현", "children": []}, {"name": "기호로 주어진 점의 x좌표, y좌표", "children": []}, {"name": "조건을 만족시키는 점 찾기", "children": []}, {"name": "좌표평면 위의 도형의 꼭짓점의 좌표", "children": []}]}, {"name": "④ x축 또는 y축 위의 점의 좌표", "children": [{"name": "축 위의 점의 판단", "children": []}, {"name": "x좌표 또는 y좌표가 주어진 축 위의 점의 좌표", "children": []}, {"name": "x축 위의 점과 y축 위의 점", "children": []}, {"name": "축 위의 점의 조건", "children": []}]}, {"name": "⑤ 좌표평면 위의 도형의 넓이", "children": [{"name": "도형의 넓이 구하기: 꼭짓점의 좌표가 주어졌을 때", "children": []}, {"name": "도형의 넓이 구하기: 꼭짓점의 조건이 주어졌을 때", "children": []}, {"name": "꼭짓점의 좌표 또는 미지수 구하기: 도형의 넓이가 주어졌을 때", "children": []}]}]}, {"name": "1-2. 사분면 이해하기", "children": [{"name": "① 사분면", "children": [{"name": "점이 위치한 사분면", "children": []}, {"name": "사분면에 대한 빈칸 채우기", "children": []}, {"name": "사분면이 주어진 경우 미지수 구하기 또는 미지수의 연산", "children": []}, {"name": "(종합) 좌표평면 또는 점에 대한 설명", "children": []}, {"name": "서로 같은 순서쌍을 이용한 점이 속한 사분면 구하기", "children": []}, {"name": "축 위의 점을 이용한 점이 속한 사분면 구하기", "children": []}]}, {"name": "② 사분면의 결정(1) 점이 속한 사분면이 주어진 경우", "children": [{"name": "위치한 사분면이 주어진 경우: 문자 1개", "children": []}, {"name": "위치한 사분면이 주어진 경우: 문자 2개 이상", "children": []}]}, {"name": "③ 사분면의 결정(2) 두 수의 부호를 이용하는 경우", "children": [{"name": "두 수의 부호가 주어진 경우", "children": []}, {"name": "두 수의 연산의 부호가 주어진 경우", "children": []}, {"name": "두 수의 절댓값의 대소관계가 주어진 경우", "children": []}]}, {"name": "④ 대칭인 점의 좌표", "children": [{"name": "x축에 대하여 대칭", "children": []}, {"name": "y축에 대하여 대칭", "children": []}, {"name": "원점에 대하여 대칭", "children": []}, {"name": "x축,y축,원점에 대하여 대칭", "children": []}, {"name": "(종합) 점에 대한 설명: 대칭 포함", "children": []}, {"name": "대칭인 점으로 이루어진 도형", "children": []}]}]}, {"name": "1-3. 그래프 알아보기", "children": [{"name": "① 그래프", "children": [{"name": "x,y 사이의 관계의 표, 그래프 표현", "children": []}]}, {"name": "② 상황에 맞는 그래프 찾기", "children": [{"name": "상황에 맞는 그래프 찾기", "children": []}]}, {"name": "③ 그래프의 해석(1) 수치가 주어지지 않은 그래프", "children": [{"name": "그래프로 표현된 두 변수 x, y 사이의 관계", "children": []}, {"name": "알맞은 상황 찾기", "children": []}]}, {"name": "④ 그래프의 해석(2) 수치가 주어진 그래프", "children": [{"name": "y값 구하기", "children": []}, {"name": "x값 구하기", "children": []}, {"name": "특정 구간의 x값 또는 y값의 합,차", "children": []}, {"name": "x값과 y값 구하기", "children": []}, {"name": "빈칸 채우기", "children": []}, {"name": "그래프에 대한 설명", "children": []}, {"name": "미지수의 연산", "children": []}]}, {"name": "⑤ 그래프의 해석(3) 물통의 모양과 그래프", "children": [{"name": "물통의 모양과 그래프", "children": []}]}, {"name": "⑥ 그래프의 해석(4) 여러 개의 그래프 비교하기", "children": [{"name": "두 그래프", "children": []}, {"name": "세 그래프", "children": []}, {"name": "여러 개의 그래프에 대한 설명", "children": []}]}]}, {"name": "1-4. 정비례 관계", "children": [{"name": "① 정비례 관계식 찾기", "children": [{"name": "정비례 판단", "children": []}]}, {"name": "② 정비례 관계식 구하기", "children": [{"name": "정비례 관계식 구하기", "children": []}]}]}, {"name": "1-5. 정비례 관계 y=ax(a≠0)의 그래프", "children": [{"name": "① 정비례 관계 y=ax(a≠0)의 그래프", "children": [{"name": "y=ax의 그래프가 지나는 사분면", "children": []}, {"name": "y=ax의 그래프에서 a의 부호에 따른 y의 값의 증감", "children": []}]}, {"name": "② 정비례 관계 y=ax(a≠0)의 그래프 그리기", "children": [{"name": "y=ax의 그래프 그리기", "children": []}]}, {"name": "③ 정비례 관계 y=ax(a≠0)의 그래프와 a의 값 사이의 관계", "children": [{"name": "y=ax의 그래프 판별: 여러 그래프를 비교", "children": []}, {"name": "y=ax의 그래프 판별: a의 부호 이용", "children": []}]}, {"name": "④ 정비례 관계 y=ax(a≠0)의 그래프 위의 점", "children": [{"name": "y=ax의 그래프 위의 점", "children": []}, {"name": "y=ax의 그래프 위의 점을 이용한 미지수 구하기", "children": []}, {"name": "y=ax의 그래프 위의 점을 이용한 다른 점 또는 선분", "children": []}, {"name": "y=ax의 그래프 위의 점을 이용한 정사각형", "children": []}]}, {"name": "⑤ 정비례 관계 y=ax(a≠0)의 그래프의 성질", "children": [{"name": "y=ax의 그래프에 대한 설명", "children": []}, {"name": "y=ax의 그래프에 대한 설명: 그래프 위의 점 포함", "children": []}]}, {"name": "⑥ 정비례 관계 y=ax(a≠0)의 그래프에서 a의 값 구하기", "children": [{"name": "지나는 한 점을 이용한 미지수 구하기", "children": []}, {"name": "지나는 한 점을 이용하여 다른 한 점 구하기", "children": []}, {"name": "y=ax꼴의 그래프가 다른 선분과 만나는 경우", "children": []}, {"name": "y=ax꼴의 두 그래프 위의 점을 이용한 선분, 정사각형", "children": []}]}, {"name": "⑦ 정비례 관계 y=ax(a≠0)의 식 구하기(1)", "children": [{"name": "y=ax의 식 구하기", "children": []}, {"name": "y=ax의 그래프가 지나는 점", "children": []}]}, {"name": "⑧ 정비례 관계 y=ax(a≠0)의 식 구하기(2) 그래프가 주어질 때", "children": [{"name": "y=ax의 식 구하기", "children": []}, {"name": "y=ax의 그래프가 지나는 점", "children": []}]}, {"name": "⑨ 정비례 관계 y=ax(a≠0)의 그래프와 도형의 넓이", "children": [{"name": "그래프 위의 점에서 축에 내린 수선의 발을 꼭짓점으로 하는 도형", "children": []}, {"name": "그래프가 축에 평행한 직선과 만나는 두 점을 꼭짓점으로 하는 도형", "children": []}, {"name": "도형의 넓이를 이등분하는 y=ax의 그래프", "children": []}, {"name": "그래프 위의 점을 꼭짓점으로 하는 도형: 점의 좌표에 미지수 포함", "children": []}]}]}, {"name": "1-6. 반비례 관계", "children": [{"name": "① 반비례 관계식 찾기", "children": [{"name": "반비례 관계식 찾기", "children": []}]}, {"name": "② 반비례 관계식 구하기", "children": [{"name": "반비례 관계식 구하기", "children": []}, {"name": "정비례, 반비례 관계식 구하기", "children": []}]}, {"name": "③ 반비례 관계 y=a/x(a≠0)의 그래프", "children": [{"name": "y={a/x}의 그래프가 지나는 사분면", "children": []}, {"name": "y=a/x의 그래프에서 a의 부호에 따른 y의 값의 증감", "children": []}]}, {"name": "④ 반비례 관계 y=a/x(a≠0)의 그래프 그리기", "children": [{"name": "y={a/x}의 그래프 그리기", "children": []}]}, {"name": "⑤ 반비례 관계 y=a/x(a≠0)의 그래프와 a의 값 사이의 관계", "children": [{"name": "y={a/x}의 그래프 판별: 여러 그래프를 비교", "children": []}]}, {"name": "⑥ 반비례 관계 y=a/x(a≠0)의 그래프 위의 점(1)", "children": [{"name": "y={a/x}의 그래프 위의 점", "children": []}, {"name": "y={a/x}의 그래프 위의 점을 이용한 미지수 구하기", "children": []}]}, {"name": "⑦ 반비례 관계 y=a/x(a≠0)의 그래프의 성질", "children": [{"name": "y={a/x}의 그래프의 성질", "children": []}, {"name": "y={a/x}의 그래프에 대한 설명: 그래프 위의 점 포함", "children": []}]}, {"name": "⑧ 반비례 관계 y=a/x(a≠0)의 그래프에서 a의 값 구하기", "children": [{"name": "지나는 한 점을 이용한 미지수 구하기", "children": []}, {"name": "지나는 한 점을 이용하여 다른 한 점 구하기", "children": []}, {"name": "다른 그래프 그리기", "children": []}, {"name": "y={a/x}꼴의 그래프 위의 두 점 사이의 관계", "children": []}]}, {"name": "⑨ 반비례 관계 y=a/x(a≠0)의 식 구하기(1)", "children": [{"name": "x와 y 사이의 관계식", "children": []}, {"name": "그래프가 지나는 점", "children": []}]}, {"name": "⑩ 반비례 관계 y=a/x(a≠0)의 식 구하기(2) 그래프가 주어질 때", "children": [{"name": "y={a/x}의 식 구하기", "children": []}, {"name": "y={a/x}의 그래프가 지나는 점", "children": []}, {"name": "그래프에 알맞은 식", "children": []}, {"name": "(종합) 그래프의 설명", "children": []}]}, {"name": "⑪ 반비례 관계 y=a/x(a≠0)의 그래프 위의 점(2) 좌표가 정수인 경우", "children": [{"name": "y={a/x}의 그래프 위의 좌표가 정수(자연수)인 점: a의 값이 주어진 경우", "children": []}, {"name": "y={a/x}의 그래프 위의 좌표가 정수(자연수)인 점: y={a/x}의 그래프가 지나는 한 점이 주어진 경우", "children": []}, {"name": "반비례 관계의 그래프 위의 좌표가 정수(자연수)인 점: 반비례 관계의 그래프가 지나는 한 점이 주어진 경우(식으로 주어지지 않음)", "children": []}]}, {"name": "⑫ 반비례 관계 y=a/x(a≠0)의 그래프와 도형의 넓이", "children": [{"name": "그래프 위의 한 점에서 축에 내린 수선의 발을 꼭짓점으로 하는 도형", "children": []}, {"name": "두 사분면 위의 점을 꼭짓점으로 하는 도형", "children": []}, {"name": "한 사분면 위의 두 점을 꼭짓점으로 하는 도형", "children": []}]}, {"name": "⑬ 정비례 관계와 반비례 관계의 그래프가 만나는 점", "children": [{"name": "교점을 이용한 미지수 또는 관계식 구하기", "children": []}, {"name": "정비례 관계와 반비례 관계의 그래프가 만나도록 하는 미지수의 범위", "children": []}, {"name": "정비례 관계와 반비례 관계의 그래프를 이용한 도형", "children": []}]}, {"name": "⑭ 정비례 관계의 활용(1) 정비례 관계 찾기", "children": [{"name": "정비례 판단", "children": []}]}, {"name": "⑮ 정비례 관계의 활용(2) x와 y 사이의 관계를 식으로 나타내기", "children": [{"name": "표 채워 넣기", "children": []}, {"name": "x와 y 사이의 관계식 구하기 (표 채워넣기 포함): 문장으로 주어진 경우", "children": []}, {"name": "x와 y 사이의 관계를 그래프로 그리기 (관계식 구하기 포함)", "children": []}, {"name": "x와 y 사이의 관계식 구하기: 그래프로 주어진 경우", "children": []}]}, {"name": "⑯ 정비례 관계의 활용(3)", "children": [{"name": "정비례 관계의 식 풀기", "children": []}, {"name": "정비례 관계의 그래프를 이용한 값 구하기", "children": []}, {"name": "정비례 관계의 식 풀기: 도형의 한 변 위에서 움직이는 점 이용", "children": []}]}, {"name": "⑰ 정비례 관계의 활용(4) 정비례 관계의 두 그래프 비교하기", "children": [{"name": "그래프의 식으로의 표현", "children": []}, {"name": "정비례 관계의 두 그래프 비교하기", "children": []}, {"name": "(종합) 정비례 관계의 두 그래프에 대한 설명", "children": []}]}, {"name": "⑱ 반비례 관계의 활용(1) 반비례 관계 찾기", "children": [{"name": "반비례 판단", "children": []}, {"name": "정비례와 반비례의 판단", "children": []}]}, {"name": "⑲ 반비례 관계의 활용(2) x와 y 사이의 관계를 식으로 나타내기", "children": [{"name": "표 채워 넣기", "children": []}, {"name": "x와 y 사이의 관계식 구하기 (표 채워넣기 포함): 문장으로 주어진 경우", "children": []}, {"name": "x와 y 사이의 관계식 구하기", "children": []}, {"name": "x와 y 사이의 관계 또는 관계식 구하기: 그래프로 주어진 경우", "children": []}, {"name": "x와 y 사이의 관계를 나타낸 그래프 고르기", "children": []}]}, {"name": "⑳ 반비례 관계의 활용(3)", "children": [{"name": "반비례 관계의 식 풀기", "children": []}, {"name": "반비례 관계의 그래프를 이용한 값 구하기", "children": []}]}, {"name": "㉑ 정비례 관계와 반비례 관계의 활용", "children": [{"name": "정비례와 반비례 관계의 활용의 풀이법", "children": []}, {"name": "정비례와 반비례 관계의 활용", "children": []}]}]}]}]}];
+
+let currentData = EMBEDDED_DATA;
+let memos = {}; // Firebase에서 로드됨
+let showDensity = true;
+let editMode = false;
+let modalNodeKey = null;
+let selectedTags = new Set();
+let undoStack = []; // stores snapshots of currentData
+
+const TAG_LABELS = { merge:'🔀 병합후보', split:'✂️ 분리후보', delete:'🗑 삭제후보', review:'⚠️ 검토필요' };
+const LEVEL_LABELS = ['대단원','중단원','소단원'];
+
+// ══ STATS ══════════════════════════════════════════
+function calcStats(data) {
+  let dae=0,jung=0,so=0,type=0,topic=0;
+  data.forEach(d => { dae++;
+    d.children.forEach(m => { jung++;
+      m.children.forEach(s => { so++;
+        s.children.forEach(t => { type++; t.children.forEach(()=>topic++); });
+      });
+    });
+  });
+  document.getElementById('s-dae').textContent=dae;
+  document.getElementById('s-jung').textContent=jung;
+  document.getElementById('s-so').textContent=so;
+  document.getElementById('s-type').textContent=type;
+  document.getElementById('s-topic').textContent=topic;
+}
+
+// ══ TREE ═══════════════════════════════════════════
+function buildNode(node, level, path) {
+  const key = path + '/' + node.name;
+  const hasChildren = node.children && node.children.length > 0;
+  const memo = memos[key];
+
+  if (level === 4) {
+    const el = document.createElement('div');
+    el.className = 'node-l4'; el.dataset.name = node.name; el.dataset.key = key;
+    el.draggable = true;
+
+    // Render merged name (parts separated by ' · ')
+    const isMerged = node.name.includes(' · ');
+    if (isMerged) {
+      const parts = node.name.split(' · ');
+      const nameWrap = document.createElement('span'); nameWrap.className = 'merged-name';
+      parts.forEach((p, i) => {
+        const s = document.createElement('span'); s.className = 'merged-part'; s.textContent = p;
+        nameWrap.appendChild(s);
+        if (i < parts.length - 1) { const sep = document.createElement('span'); sep.className = 'merged-sep'; sep.textContent = '/'; nameWrap.appendChild(sep); }
+      });
+      el.appendChild(nameWrap);
+      // Split button
+      const sb = document.createElement('button'); sb.className = 'split-btn'; sb.textContent = '✂ 분리';
+      sb.onclick = e => { e.stopPropagation(); splitNode(node, path); };
+      el.appendChild(sb);
+    } else {
+      const span = document.createElement('span'); span.className='node-name'; span.textContent=node.name;
+      el.appendChild(span);
+    }
+
+    if (memo) memo.tags.forEach(t => { const tag=document.createElement('span'); tag.className=`mtag mtag-${t}`; tag.textContent=TAG_LABELS[t]; el.appendChild(tag); });
+    el.addEventListener('contextmenu', e => { e.preventDefault(); openModal(key, node.name, path); });
+
+    // Drag events for level 4
+    el.addEventListener('dragstart', e => { e.stopPropagation(); dragSrc={node, path, level:4}; el.classList.add('drag-src'); e.dataTransfer.effectAllowed='move'; });
+    el.addEventListener('dragend', () => { el.classList.remove('drag-src'); document.querySelectorAll('.drop-target').forEach(x=>x.classList.remove('drop-target')); });
+    el.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); if(dragSrc&&dragSrc.level===4&&dragSrc.node!==node) el.classList.add('drop-target'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drop-target'));
+    el.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); el.classList.remove('drop-target'); if(dragSrc&&dragSrc.level===4&&dragSrc.node!==node) mergeNodes(dragSrc, {node, path, level:4}); });
+
+    return el;
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.className = `node-l${level}`; wrapper.dataset.name=node.name; wrapper.dataset.key=key;
+  if (level === 3) wrapper.draggable = true;
+
+  const header = document.createElement('div'); header.className='node-header';
+
+  if (level <= 2) { const tag=document.createElement('span'); tag.className='level-tag'; tag.textContent=LEVEL_LABELS[level]; header.appendChild(tag); }
+
+  // Merged name rendering for level 3
+  const isMergedL3 = level === 3 && node.name.includes(' · ');
+  let nameSpan;
+  if (isMergedL3) {
+    const parts = node.name.split(' · ');
+    nameSpan = document.createElement('span'); nameSpan.className = 'merged-name node-name';
+    parts.forEach((p, i) => {
+      const s = document.createElement('span'); s.className = 'merged-part'; s.textContent = p;
+      nameSpan.appendChild(s);
+      if (i < parts.length - 1) { const sep = document.createElement('span'); sep.className = 'merged-sep'; sep.textContent = '/'; nameSpan.appendChild(sep); }
+    });
+  } else {
+    nameSpan = document.createElement('span'); nameSpan.className='node-name'; nameSpan.textContent=node.name;
+  }
+  header.appendChild(nameSpan);
+
+  if (memo) {
+    const mw=document.createElement('div'); mw.className='memo-tags';
+    memo.tags.forEach(t => { const tag=document.createElement('span'); tag.className=`mtag mtag-${t}`; tag.textContent=TAG_LABELS[t]; mw.appendChild(tag); });
+    header.appendChild(mw);
+  }
+
+  if (showDensity && level===2 && hasChildren) {
+    const cnt=node.children.length;
+    const cls=cnt<=3?'bar-low':cnt<=8?'bar-mid':cnt<=14?'bar-high':'bar-excess';
+    const wrap=document.createElement('div'); wrap.className='density-bar-wrap';
+    const bar=document.createElement('div'); bar.className=`density-bar ${cls}`; bar.style.width=Math.max(4,Math.round(Math.min(cnt/20,1)*70))+'px';
+    const num=document.createElement('span'); num.className='density-num'; num.textContent=cnt;
+    wrap.appendChild(bar); wrap.appendChild(num); header.appendChild(wrap);
+  }
+
+  if (hasChildren) { const b=document.createElement('span'); b.className='badge'; b.textContent=node.children.length; header.appendChild(b); }
+
+  const memoBtn=document.createElement('button'); memoBtn.className='edit-btn'; memoBtn.textContent=memo?'📝':'+ 메모';
+  memoBtn.onclick=e=>{e.stopPropagation();openModal(key,node.name,path);}; header.appendChild(memoBtn);
+
+  // ── INLINE EDIT CONTROLS ──
+  const ec=document.createElement('div'); ec.className='node-edit-controls';
+
+  // Rename button
+  const renBtn=document.createElement('button'); renBtn.className='ebi rename'; renBtn.title='이름 수정 (F2)'; renBtn.textContent='✏️';
+  renBtn.onclick=e=>{e.stopPropagation(); startRename(nameSpan, node, path, wrapper, level);};
+  ec.appendChild(renBtn);
+
+  // Add child button (not on leaf level 3 if adding would exceed; show on 0-2)
+  if(level<=3){
+    const addBtn=document.createElement('button'); addBtn.className='ebi add'; addBtn.title='하위 항목 추가'; addBtn.textContent='＋';
+    addBtn.onclick=e=>{e.stopPropagation(); addChild(node, wrapper, level, key);};
+    ec.appendChild(addBtn);
+  }
+
+  // Move up / down buttons
+  const upBtn=document.createElement('button'); upBtn.className='ebi up'; upBtn.title='위로 이동'; upBtn.textContent='↑';
+  upBtn.onclick=e=>{e.stopPropagation(); moveNode(node, path, -1);};
+  ec.appendChild(upBtn);
+
+  const dnBtn=document.createElement('button'); dnBtn.className='ebi dn'; dnBtn.title='아래로 이동'; dnBtn.textContent='↓';
+  dnBtn.onclick=e=>{e.stopPropagation(); moveNode(node, path, +1);};
+  ec.appendChild(dnBtn);
+
+  // Delete button
+  const delBtn=document.createElement('button'); delBtn.className='ebi del'; delBtn.title='삭제';
+  delBtn.textContent='🗑';
+  delBtn.onclick=e=>{e.stopPropagation(); deleteNode(node, path);};
+  ec.appendChild(delBtn);
+
+  header.appendChild(ec);
+
+  // Split button for merged level-3 nodes
+  if (isMergedL3) {
+    const sb = document.createElement('button'); sb.className = 'split-btn'; sb.textContent = '✂ 분리';
+    sb.onclick = e => { e.stopPropagation(); splitNode(node, path); };
+    header.appendChild(sb);
+  }
+
+  // Drag events for level 3 (유형) merge
+  if (level === 3) {
+    wrapper.addEventListener('dragstart', e => { e.stopPropagation(); dragSrc={node, path, level:3}; wrapper.classList.add('drag-src'); e.dataTransfer.effectAllowed='move'; });
+    wrapper.addEventListener('dragend', () => { wrapper.classList.remove('drag-src'); document.querySelectorAll('.drop-target,.drop-target-move').forEach(x=>{x.classList.remove('drop-target');x.classList.remove('drop-target-move');}); });
+    header.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); if(dragSrc&&dragSrc.level===3&&dragSrc.node!==node) wrapper.classList.add('drop-target'); });
+    header.addEventListener('dragleave', e => { if(!wrapper.contains(e.relatedTarget)) wrapper.classList.remove('drop-target'); });
+    header.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); wrapper.classList.remove('drop-target'); if(dragSrc&&dragSrc.level===3&&dragSrc.node!==node) mergeNodes(dragSrc, {node, path, level:3}); });
+  }
+
+  // 소단원(level 2) 헤더: 유형 드롭 시 다른 소단원으로 이동
+  if (level === 2) {
+    header.addEventListener('dragover', e => {
+      if(dragSrc && dragSrc.level === 3) { e.preventDefault(); e.stopPropagation(); wrapper.classList.add('drop-target-move'); }
+    });
+    header.addEventListener('dragleave', e => { if(!wrapper.contains(e.relatedTarget)) wrapper.classList.remove('drop-target-move'); });
+    header.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation();
+      wrapper.classList.remove('drop-target-move');
+      if(dragSrc && dragSrc.level === 3) moveTypeToSodan(dragSrc, node);
+    });
+  }
+
+  if (hasChildren) { const arrow=document.createElement('span'); arrow.className='arrow'; arrow.textContent='▼'; header.appendChild(arrow); }
+
+  // ── TOPIC HOVER TOOLTIP (level 3 = 유형) ──
+  if (level === 3 && node.children && node.children.length > 0) {
+    const tip = document.createElement('div');
+    tip.className = 'topic-tooltip';
+    const ttl = document.createElement('div');
+    ttl.className = 'topic-tooltip-title';
+    ttl.textContent = `주제유형 ${node.children.length}개`;
+    tip.appendChild(ttl);
+    node.children.forEach(child => {
+      const item = document.createElement('div');
+      item.className = 'topic-tooltip-item';
+      item.textContent = child.name;
+      tip.appendChild(item);
+    });
+    wrapper.appendChild(tip);
+
+    let hoverTimer;
+    header.addEventListener('mouseenter', () => {
+      hoverTimer = setTimeout(() => tip.classList.add('visible'), 180);
+    });
+    header.addEventListener('mousemove', (e) => {
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top  = (e.clientY - 10) + 'px';
+    });
+    header.addEventListener('mouseleave', () => {
+      clearTimeout(hoverTimer);
+      tip.classList.remove('visible');
+    });
+  }
+
+  wrapper.appendChild(header);
+
+  if (hasChildren) {
+    const childrenDiv=document.createElement('div'); childrenDiv.className='node-children';
+    node.children.forEach(c=>childrenDiv.appendChild(buildNode(c,level+1,key)));
+    wrapper.appendChild(childrenDiv);
+    header.addEventListener('click',e=>{
+      if(e.target.closest('.edit-btn,.ebi,.split-btn,.node-edit-controls'))return;
+      const isCollapsed=wrapper.classList.toggle('collapsed');
+      childrenDiv.style.display=isCollapsed?'none':'';
+      // 접을 때 하위 노드도 모두 접기
+      if(isCollapsed){
+        childrenDiv.querySelectorAll('.node-l1,.node-l2,.node-l3').forEach(el=>{
+          el.classList.add('collapsed');
+          const ch=el.querySelector(':scope > .node-children');
+          if(ch) ch.style.display='none';
+        });
+      }
+    });
+    if(level>0){wrapper.classList.add('collapsed');childrenDiv.style.display='none';}
+  }
+  return wrapper;
+}
+
+function renderTree(data) {
+  const c=document.getElementById('treeContainer'); c.innerHTML='';
+  calcStats(data);
+  data.forEach(n=>c.appendChild(buildNode(n,0,'')));
+}
+
+// 현재 펼쳐진 노드의 key 목록 저장
+function saveExpandState() {
+  const open = new Set();
+  document.querySelectorAll('.node-l0,.node-l1,.node-l2,.node-l3').forEach(el => {
+    if(!el.classList.contains('collapsed')) open.add(el.dataset.key);
+  });
+  return open;
+}
+
+// 저장된 key 목록 기준으로 펼치기 복원
+function restoreExpandState(open) {
+  document.querySelectorAll('.node-l0,.node-l1,.node-l2,.node-l3').forEach(el => {
+    if(open.has(el.dataset.key)) {
+      el.classList.remove('collapsed');
+      const ch = el.querySelector(':scope > .node-children');
+      if(ch) ch.style.display = '';
+    }
+  });
+}
+
+// 상태 유지하면서 다시 그리기
+function renderTreeKeepState(data) {
+  const open = saveExpandState();
+  renderTree(data);
+  restoreExpandState(open);
+}
+
+// ══ EXPAND/COLLAPSE ════════════════════════════════
+function expandAll(){document.querySelectorAll('.node-children').forEach(e=>e.style.display='');document.querySelectorAll('[class^="node-l"]').forEach(e=>e.classList.remove('collapsed'));}
+function collapseAll(){document.querySelectorAll('.node-l1,.node-l2,.node-l3').forEach(e=>{e.classList.add('collapsed');const ch=e.querySelector(':scope > .node-children');if(ch)ch.style.display='none';});}
+function expandToLevel(max){collapseAll();for(let l=0;l<max;l++){document.querySelectorAll(`.node-l${l}`).forEach(e=>{e.classList.remove('collapsed');const ch=e.querySelector(':scope > .node-children');if(ch)ch.style.display='';});}}
+function toggleDensity(){showDensity=!showDensity;document.getElementById('densityToggle').textContent=showDensity?'ON':'OFF';renderTree(currentData);}
+
+// ══ SEARCH ═════════════════════════════════════════
+function doSearch(q){
+  document.querySelectorAll('.highlight').forEach(e=>{e.outerHTML=e.textContent;});
+  if(!q.trim()){collapseAll();return;}
+  const lower=q.toLowerCase();
+  document.querySelectorAll('[class^="node-l"]').forEach(el=>{
+    const name=el.dataset.name||'';
+    if(name.toLowerCase().includes(lower)){
+      el.classList.add('search-match');
+      const ne=el.querySelector('.node-name');
+      if(ne){const i=name.toLowerCase().indexOf(lower);ne.innerHTML=esc(name.slice(0,i))+'<mark class="highlight">'+esc(name.slice(i,i+q.length))+'</mark>'+esc(name.slice(i+q.length));}
+    } else el.classList.remove('search-match');
+  });
+  document.querySelectorAll('.search-match').forEach(el=>{
+    let p=el.parentElement;
+    while(p&&p!==document.getElementById('treeContainer')){if(p.classList.contains('node-children'))p.style.display='';if(p.dataset&&p.dataset.name)p.classList.remove('collapsed');p=p.parentElement;}
+  });
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ══ TABS ═══════════════════════════════════════════
+function switchTab(name){
+  ['tree','analysis','memo','export'].forEach((t,i)=>{
+    document.querySelectorAll('.tab')[i].classList.toggle('active',t===name);
+    document.getElementById('panel-'+t).classList.toggle('active',t===name);
+  });
+  if(name==='analysis')buildAnalysis();
+  if(name==='memo')renderMemoList('');
+  if(name==='export')buildExportPreviews();
+}
+
+// ══ ANALYSIS ═══════════════════════════════════════
+function buildAnalysis(){
+  const c=document.getElementById('analysisContainer'); c.innerHTML='';
+  const soList=[];
+  currentData.forEach(d=>d.children.forEach(m=>m.children.forEach(s=>{
+    soList.push({dae:d.name,jung:m.name,so:s.name,types:s.children.length,topics:s.children.reduce((a,t)=>a+t.children.length,0)});
+  })));
+  const maxT=Math.max(...soList.map(x=>x.types),1);
+  const avg=(soList.reduce((a,x)=>a+x.types,0)/soList.length).toFixed(1);
+  const excess=soList.filter(x=>x.types>=15).length;
+  const thin=soList.filter(x=>x.types<=2).length;
+
+  // Cards
+  const sec1=document.createElement('div'); sec1.className='analysis-section';
+  sec1.innerHTML='<div class="analysis-title"><span class="icon">📌</span>전체 요약</div>';
+  const cards=document.createElement('div'); cards.className='summary-cards';
+  [{label:'소단원 수',val:soList.length,sub:'전체'},{label:'유형 평균',val:avg,sub:'소단원당'},{label:'과밀 소단원',val:excess,sub:'유형 15개↑',color:'#ef4444'},{label:'희박 소단원',val:thin,sub:'유형 2개↓',color:'#3b82f6'},{label:'총 유형 수',val:soList.reduce((a,x)=>a+x.types,0),sub:''},{label:'총 주제유형',val:soList.reduce((a,x)=>a+x.topics,0),sub:''}].forEach(d=>{
+    const card=document.createElement('div'); card.className='scard';
+    card.innerHTML=`<div class="scard-label">${d.label}</div><div class="scard-val" style="${d.color?`color:${d.color}`:''}">${d.val}</div><div class="scard-sub">${d.sub}</div>`;
+    cards.appendChild(card);
+  });
+  sec1.appendChild(cards); c.appendChild(sec1);
+
+  // Bar chart
+  const sec2=document.createElement('div'); sec2.className='analysis-section';
+  sec2.innerHTML='<div class="analysis-title"><span class="icon">📊</span>소단원별 유형 수 분포 <span style="font-size:11px;color:var(--muted);font-weight:400;">초록 ≤3 · 노랑 4~8 · 주황 9~14 · 빨강 15↑</span></div>';
+  const grid=document.createElement('div'); grid.className='density-grid';
+  [...soList].sort((a,b)=>b.types-a.types).forEach(item=>{
+    const cls=item.types<=3?'bar-low':item.types<=8?'bar-mid':item.types<=14?'bar-high':'bar-excess';
+    const pct=(item.types/maxT*100).toFixed(1);
+    const row=document.createElement('div'); row.className='density-row';
+    row.innerHTML=`<div class="label" title="${item.dae} > ${item.jung} > ${item.so}">${item.so}</div><div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div><div class="val">${item.types}</div>`;
+    grid.appendChild(row);
+  });
+  sec2.appendChild(grid); c.appendChild(sec2);
+
+  // Heatmap
+  const sec3=document.createElement('div'); sec3.className='analysis-section';
+  sec3.innerHTML='<div class="analysis-title"><span class="icon">🗺</span>중단원별 유형 수 히트맵</div>';
+  const hw=document.createElement('div'); hw.className='heatmap-wrap';
+  const tbl=document.createElement('table'); tbl.className='heatmap-table';
+  tbl.innerHTML='<thead><tr><th>중단원</th><th>소단원 수</th><th>유형 합계</th><th>평균</th><th>최대</th><th>밀도 판정</th></tr></thead>';
+  const tb=document.createElement('tbody');
+  currentData.forEach(d=>d.children.forEach(m=>{
+    const sc=m.children.length;
+    const tt=m.children.reduce((a,s)=>a+s.children.length,0);
+    const av=sc?(tt/sc).toFixed(1):0;
+    const mx=Math.max(...m.children.map(s=>s.children.length),0);
+    const hi=tt<=10?0:tt<=25?1:tt<=50?2:3;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span style="font-size:10px;color:var(--muted);">${d.name}</span> · ${m.name}</td><td>${sc}</td><td>${tt}</td><td>${av}</td><td>${mx}</td><td><span class="heatmap-cell heat-${hi}">${['적정','주의','과밀','과밀↑'][hi]}</span></td>`;
+    tb.appendChild(tr);
+  }));
+  tbl.appendChild(tb); hw.appendChild(tbl); sec3.appendChild(hw); c.appendChild(sec3);
+}
+
+// ══ MEMO & TAGS ════════════════════════════════════
+function openModal(key, name, path){
+  modalNodeKey=key;
+  document.getElementById('modalPath').textContent=path.replace(/\//g,' > ').replace(/^ > /,'');
+  document.getElementById('memoText').value=memos[key]?.text||'';
+  selectedTags=new Set(memos[key]?.tags||[]);
+  ['merge','split','delete','review'].forEach(t=>document.getElementById('tag-'+t).classList.toggle('selected',selectedTags.has(t)));
+  document.getElementById('memoModal').classList.add('open');
+  setTimeout(()=>document.getElementById('memoText').focus(),100);
+}
+function closeModal(){document.getElementById('memoModal').classList.remove('open');modalNodeKey=null;}
+function toggleTag(t){selectedTags.has(t)?selectedTags.delete(t):selectedTags.add(t);document.getElementById('tag-'+t).classList.toggle('selected',selectedTags.has(t));}
+function saveMemo(){
+  if(!modalNodeKey)return;
+  const text=document.getElementById('memoText').value.trim();
+  const tags=[...selectedTags];
+  if(!text&&!tags.length)delete memos[modalNodeKey];
+  else memos[modalNodeKey]={text,tags};
+  window._fb.set(window._fb.ref(window._fb.db, 'memos'), memos);
+  closeModal(); renderTree(currentData); updateMemoBadge();
+}
+function updateMemoBadge(){const n=Object.keys(memos).length;document.getElementById('memo-count-badge').textContent=n>0?` (${n})`:''; }
+function filterMemos(tag){renderMemoList(tag);}
+function renderMemoList(filterTag){
+  const list=document.getElementById('memoList'); list.innerHTML='';
+  const entries=Object.entries(memos).filter(([k,v])=>!filterTag||v.tags.includes(filterTag));
+  if(!entries.length){list.innerHTML='<div class="memo-empty">해당 태그의 메모가 없습니다.</div>';return;}
+  entries.forEach(([key,memo])=>{
+    const parts=key.split('/').filter(Boolean);
+    const name=parts[parts.length-1]; const path=parts.slice(0,-1).join(' > ');
+    const item=document.createElement('div'); item.className='memo-item';
+    const left=document.createElement('div'); left.className='memo-item-left';
+    left.innerHTML=`<div class="memo-path">${path}</div><div class="memo-name">${name}</div>`;
+    if(memo.text){const p=document.createElement('div');p.className='memo-text';p.textContent=memo.text;left.appendChild(p);}
+    const right=document.createElement('div'); right.className='memo-item-right';
+    if(memo.tags.length){const tw=document.createElement('div');tw.className='memo-tags';memo.tags.forEach(t=>{const tag=document.createElement('span');tag.className=`mtag mtag-${t}`;tag.textContent=TAG_LABELS[t];tw.appendChild(tag);});right.appendChild(tw);}
+    const del=document.createElement('button'); del.className='memo-del'; del.textContent='삭제';
+    del.onclick=()=>{delete memos[key];window._fb.set(window._fb.ref(window._fb.db, 'memos'), memos);renderMemoList(filterTag);updateMemoBadge();renderTree(currentData);};
+    right.appendChild(del); item.appendChild(left); item.appendChild(right); list.appendChild(item);
+  });
+}
+
+// ══ EXPORT ═════════════════════════════════════════
+function buildOutlineText(){
+  const lines=[]; const P=['◆ ','▷ ','▸ ','· ','  '];
+  function walk(n,lv){lines.push('  '.repeat(lv)+P[Math.min(lv,4)]+n.name);(n.children||[]).forEach(c=>walk(c,lv+1));}
+  currentData.forEach(n=>walk(n,0)); return lines.join('\n');
+}
+function buildMemoReport(){
+  const entries=Object.entries(memos); if(!entries.length)return'(메모 없음)';
+  let lines=['[커리큘럼 검토 리포트]\n'];
+  const groups={merge:[],split:[],delete:[],review:[],none:[]};
+  entries.forEach(([key,memo])=>{
+    const parts=key.split('/').filter(Boolean);
+    const nm=parts[parts.length-1]; const pth=parts.slice(0,-1).join(' > ');
+    const ln=`  • ${pth} > ${nm}${memo.text?'\n    메모: '+memo.text:''}`;
+    if(memo.tags.length)memo.tags.forEach(t=>groups[t].push(ln)); else groups.none.push(ln);
+  });
+  const titles={merge:'🔀 병합 후보',split:'✂️ 분리 후보',delete:'🗑 삭제 후보',review:'⚠️ 검토 필요',none:'태그 없음'};
+  Object.entries(groups).forEach(([tag,list])=>{if(list.length)lines.push(`\n[${titles[tag]}]\n`+list.join('\n'));});
+  return lines.join('');
+}
+function buildExportPreviews(){
+  const o=buildOutlineText(); document.getElementById('outlinePreview').textContent=o.slice(0,600)+(o.length>600?'\n...(이하 생략)':'');
+  const m=buildMemoReport(); document.getElementById('memoPreview').textContent=m.slice(0,600)+(m.length>600?'\n...':'');
+}
+function exportOutline(){navigator.clipboard.writeText(buildOutlineText()).then(()=>alert('클립보드에 복사되었습니다!'));}
+function exportMemoReport(){navigator.clipboard.writeText(buildMemoReport()).then(()=>alert('메모 리포트가 복사되었습니다!'));}
+function exportXlsx(){
+  const rows=[['학년','대단원','중단원','소단원','유형','주제 유형']];
+
+  // 이전 행 값을 추적해서 동일하면 빈 칸으로
+  let prev = { 학년:'', 대단원:'', 중단원:'', 소단원:'', 유형:'' };
+
+  currentData.forEach(d=>d.children.forEach(m=>m.children.forEach(s=>s.children.forEach(t=>{
+    const typeName = t.name;
+    const topics = t.children.length ? t.children : [{ name:'' }];
+
+    topics.forEach((tp, ti) => {
+      const 학년  = '중1';
+      const 대단원 = d.name;
+      const 중단원 = m.name;
+      const 소단원 = s.name;
+      const 유형  = typeName;
+      const 주제유형 = tp.name;
+
+      rows.push([
+        학년  === prev.학년  ? '' : 학년,
+        대단원 === prev.대단원 ? '' : 대단원,
+        중단원 === prev.중단원 ? '' : 중단원,
+        소단원 === prev.소단원 ? '' : 소단원,
+        유형  === prev.유형  ? '' : 유형,
+        주제유형
+      ]);
+
+      prev = { 학년, 대단원, 중단원, 소단원, 유형 };
+    });
+  }))));
+
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'커리큘럼');
+  const mr=[['경로','이름','태그','메모']];
+  Object.entries(memos).forEach(([k,m])=>{const p=k.split('/').filter(Boolean);mr.push([p.slice(0,-1).join(' > '),p[p.length-1],m.tags.join(', '),m.text]);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(mr),'메모_태그');
+  XLSX.writeFile(wb,'커리큘럼_중1-1_수정본.xlsx');
+}
+
+// ══ DRAG & DROP MERGE / SPLIT ══════════════════════
+let dragSrc = null;
+
+// Walk the tree to find which array directly contains a given node object
+function findParentArray(data, targetNode) {
+  for (const n of data) {
+    if (n === targetNode) return data;
+    if (n.children && n.children.length) {
+      const found = findParentArray(n.children, targetNode);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function mergeNodes(src, tgt) {
+  snapshot();
+
+  const srcParts = src.node.name.split(' · ');
+  const tgtParts = tgt.node.name.split(' · ');
+  const mergedName = [...tgtParts, ...srcParts].join(' · ');
+
+  // Tag each child with its owner part name before merging
+  // (so we can un-merge later);
+
+  // tgt children: tag with original tgt parts' first part if not already tagged
+  const tgtChildren = (tgt.node.children || []).map(c =>
+    c._owner ? c : { ...c, _owner: tgtParts[0] }
+  );
+  // src children: tag with src parts' first part
+  const srcChildren = (src.node.children || []).map(c =>
+    c._owner ? c : { ...c, _owner: srcParts[0] }
+  );
+
+  tgt.node.name = mergedName;
+  tgt.node.children = [...tgtChildren, ...srcChildren];
+
+  // Remove src from its parent array
+  const srcParent = findParentArray(currentData, src.node);
+  if (srcParent) {
+    const idx = srcParent.indexOf(src.node);
+    if (idx !== -1) srcParent.splice(idx, 1);
+  }
+
+  showUndo(`"${srcParts[0]}" + "${tgtParts[0]}" 병합됨`);
+  renderTreeKeepState(currentData);
+  saveTreeToFirebase();
+}
+
+function splitNode(node, path) {
+  const parts = node.name.split(' · ');
+  if (parts.length < 2) return;
+  snapshot();
+
+  const parentArr = findParentArray(currentData, node);
+  if (!parentArr) return;
+  const idx = parentArr.indexOf(node);
+  if (idx === -1) return;
+
+  const allChildren = node.children || [];
+
+  // Restore each child to its original owner, falling back to first part
+  const newNodes = parts.map((p, i) => {
+    const mine = allChildren
+      .filter(c => c._owner ? c._owner === p : i === 0)
+      .map(({ _owner, ...rest }) => rest); // strip _owner tag
+    return { name: p, children: mine };
+  });
+
+  parentArr.splice(idx, 1, ...newNodes);
+  showUndo(`${parts.length}개 항목으로 분리됨`);
+  renderTreeKeepState(currentData);
+  saveTreeToFirebase();
+}
+
+// ══ 유형 → 다른 소단원으로 이동 ══════════════════════
+function moveTypeToSodan(src, targetSodan) {
+  // src.node = 유형 노드, targetSodan = 목적지 소단원 노드
+  if(src.node === targetSodan) return;
+
+  // 같은 소단원이면 무시 (소단원 내 이동은 ↑↓ 버튼으로)
+  const srcParent = findParentArray(currentData, src.node);
+  if(srcParent === targetSodan.children) return;
+
+  snapshot();
+
+  // src 유형을 원래 소단원에서 제거
+  const idx = srcParent ? srcParent.indexOf(src.node) : -1;
+  if(idx === -1) return;
+  srcParent.splice(idx, 1);
+
+  // 목적지 소단원 children 끝에 추가
+  if(!targetSodan.children) targetSodan.children = [];
+  targetSodan.children.push(src.node);
+
+  showUndo(`"${src.node.name}" → "${targetSodan.name}"으로 이동됨`);
+  renderTreeKeepState(currentData);
+  saveTreeToFirebase();
+}
+function toggleEditMode(){
+  editMode=!editMode;
+  document.body.classList.toggle('edit-mode',editMode);
+  document.getElementById('editModeBtn').textContent=editMode?'✏️ 편집 중':'✏️ 편집 모드';
+  document.getElementById('editModeBtn').style.background=editMode?'#fffbeb':'';
+}
+
+// ── snapshot/undo ──
+function snapshot(){undoStack.push(JSON.stringify(currentData));if(undoStack.length>30)undoStack.shift();}
+function saveTreeToFirebase(){
+  if(!window._fbReady) return;
+  window._fb.set(window._fb.ref(window._fb.db, 'treeData'), currentData);
+}
+function undoLast(){
+  if(!undoStack.length)return;
+  currentData=JSON.parse(undoStack.pop());
+  renderTree(currentData);
+  saveTreeToFirebase();
+  showUndo('되돌렸습니다.');
+}
+let undoTimer=null;
+function showUndo(msg){
+  const t=document.getElementById('undoToast'); const m=document.getElementById('undoMsg');
+  m.textContent=msg; t.classList.add('show');
+  clearTimeout(undoTimer); undoTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── rename ──
+function startRename(nameSpan, node, path, wrapper, level){
+  const oldName = node.name;
+  const inp = document.createElement('input');
+  inp.type='text'; inp.value=oldName; inp.className='inline-input';
+  nameSpan.replaceWith(inp);
+  inp.focus(); inp.select();
+
+  function commit(){
+    const newName = inp.value.trim();
+    if(!newName || newName === oldName){ inp.replaceWith(nameSpan); return; }
+    snapshot();
+    // Use object reference — safe even for merged names with ' · '
+    node.name = newName;
+    showUndo(`"${oldName}" → "${newName}" 으로 변경`);
+    renderTree(currentData);
+    saveTreeToFirebase();
+  }
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => {
+    if(e.key==='Enter') inp.blur();
+    if(e.key==='Escape'){ inp.removeEventListener('blur', commit); inp.replaceWith(nameSpan); }
+  });
+}
+
+// ── delete ──
+function deleteNode(node, path){
+  if(!confirm(`"${node.name}" 항목을 삭제할까요?\n(하위 항목 전체 포함)`))return;
+  snapshot();
+  const arr = findParentArray(currentData, node);
+  if(!arr) return;
+  const idx = arr.indexOf(node);
+  if(idx === -1) return;
+  arr.splice(idx, 1);
+  showUndo(`"${node.name}" 삭제됨`);
+  renderTree(currentData);
+  saveTreeToFirebase();
+}
+
+// ── move up/down ──
+function moveNode(node, path, dir){
+  snapshot();
+  const arr = findParentArray(currentData, node);
+  if(!arr) return;
+  const idx = arr.indexOf(node);
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= arr.length) return;
+  [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+  showUndo(`"${node.name}" ${dir<0?'위':'아래'}로 이동`);
+  renderTree(currentData);
+  saveTreeToFirebase();
+  const level = path.split('/').filter(Boolean).length;
+  expandToLevel(level + 1);
+}
+
+// ── add child ──
+function addChild(parentNode, wrapper, level, key){
+  const childName=prompt('추가할 항목 이름을 입력하세요:','');
+  if(!childName||!childName.trim())return;
+  snapshot();
+  if(!parentNode.children)parentNode.children=[];
+  parentNode.children.push({name:childName.trim(),children:[]});
+  showUndo(`"${childName.trim()}" 추가됨`);
+  renderTree(currentData);
+  saveTreeToFirebase();
+  expandToLevel(level+2);
+}
+
+// ══ FILE LOAD ══════════════════════════════════════
+function handleFile(input){
+  const file=input.files[0]; if(!file)return;
+  document.getElementById('upload-status').textContent='읽는 중...';
+  const reader=new FileReader();
+  reader.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];currentData=parseRows(XLSX.utils.sheet_to_json(ws,{header:1,defval:null}));renderTree(currentData);document.getElementById('upload-status').textContent='✅ '+file.name;}catch(err){document.getElementById('upload-status').textContent='❌ '+err.message;}};
+  reader.readAsArrayBuffer(file);
+}
+function parseRows(rows){
+  const result=[]; const cur={};
+  function foc(list,name){let i=list.find(x=>x.name===name);if(!i){i={name,children:[]};list.push(i);}return i;}
+  for(let i=1;i<rows.length;i++){
+    const [학년,대단원,중단원,소단원,유형,주제유형]=rows[i];
+    if(대단원)cur.대단원=대단원; if(중단원)cur.중단원=중단원; if(소단원)cur.소단원=소단원; if(유형)cur.유형=유형;
+    const dN=foc(result,cur.대단원);
+    if(cur.중단원){const mN=foc(dN.children,cur.중단원);if(cur.소단원){const sN=foc(mN.children,cur.소단원);if(cur.유형){const tN=foc(sN.children,cur.유형);if(주제유형)tN.children.push({name:주제유형,children:[]});}}}
+  }
+  return result;
+}
+async function loadFromOneDrive(){
+  let url=document.getElementById('onedriveUrl').value.trim(); if(!url)return;
+  if((url.includes('1drv.ms')||url.includes('onedrive.live.com'))&&!url.includes('download=1'))url+=(url.includes('?')?'&':'?')+'download=1';
+  document.getElementById('onedrive-status').textContent='불러오는 중...';
+  localStorage.setItem('onedrive_url_jungil1',document.getElementById('onedriveUrl').value.trim());
+  try{const r=await fetch(url);if(!r.ok)throw new Error(`HTTP ${r.status}`);const ab=await r.arrayBuffer();const wb=XLSX.read(ab,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];currentData=parseRows(XLSX.utils.sheet_to_json(ws,{header:1,defval:null}));renderTree(currentData);document.getElementById('onedrive-status').textContent='✅ 연동 성공!';}
+  catch(err){document.getElementById('onedrive-status').textContent='❌ '+err.message;}
+}
+
+// ══ INIT ═══════════════════════════════════════════
+
+// 1) 내장 데이터로 즉시 렌더링 (Firebase 연결 전에도 보임)
+renderTree(currentData);
+updateMemoBadge();
+document.getElementById('memoModal').addEventListener('click',e=>{if(e.target===document.getElementById('memoModal'))closeModal();});
+
+// 2) Firebase 연결 상태 배너
+const connBanner = document.createElement('div');
+connBanner.id = 'conn-banner';
+connBanner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;padding:6px 16px;font-size:11px;text-align:center;z-index:9999;background:#fef3c7;color:#92400e;';
+connBanner.textContent = '⏳ Firebase 연결 중... (설정 전이면 로컬 모드로 작동)';
+document.body.appendChild(connBanner);
+
+// 3) Firebase 준비되면 실시간 데이터로 교체
+window.addEventListener('firebase-ready', () => {
+  const { db, ref, onValue } = window._fb;
+
+  // 트리 데이터 실시간 리스너
+  onValue(ref(db, 'treeData'), (snapshot) => {
+    const data = snapshot.val();
+    if (data && Array.isArray(data) && data.length > 0) {
+      currentData = data;
+      renderTree(currentData);
+    }
+    // Firebase에 데이터 없으면 내장 데이터 그대로 유지
+  });
+
+  // 메모 실시간 리스너
+  onValue(ref(db, 'memos'), (snapshot) => {
+    const data = snapshot.val();
+    memos = data || {};
+    updateMemoBadge();
+    if(document.getElementById('panel-memo').classList.contains('active')) {
+      renderMemoList('');
+    }
+  });
+
+  connBanner.style.background = '#d1fae5';
+  connBanner.style.color = '#065f46';
+  connBanner.textContent = '✅ Firebase 연결됨 — 모든 변경사항이 실시간으로 공유됩니다';
+  setTimeout(() => connBanner.style.display = 'none', 3000);
+});
+</script>
+</body>
+</html>
